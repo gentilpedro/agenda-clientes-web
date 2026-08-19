@@ -1,0 +1,53 @@
+export interface Cliente {
+  id: string;
+  nome: string;
+  email: string | null;
+  telefone: string;
+  observacoes: string | null;
+  criadoEm: string;
+}
+
+export interface ClienteInput {
+  nome: string;
+  email?: string;
+  telefone: string;
+  observacoes?: string;
+}
+
+export type AgendamentoStatus = 'AGENDADO' | 'CANCELADO' | 'CONCLUIDO';
+
+export interface Agendamento {
+  id: string;
+  clienteId: string;
+  dataHora: string;
+  duracaoMinutos: number;
+  status: AgendamentoStatus;
+  observacoes: string | null;
+}
+
+export interface AgendamentoInput {
+  clienteId: string;
+  dataHora: string;
+  duracaoMinutos: number;
+  observacoes?: string;
+}
+
+export interface Usuario {
+  id: string;
+  nome: string;
+  email: string;
+}
+
+export interface AuthResponse {
+  token: string;
+  id: string;
+  nome: string;
+  email: string;
+}
+
+export interface ApiError {
+  timestamp: string;
+  status: number;
+  message: string;
+  fieldErrors: Record<string, string>;
+}

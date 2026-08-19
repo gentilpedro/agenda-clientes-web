@@ -1,0 +1,220 @@
+@import url('https://fonts.googleapis.com/css2?family=Caprasimo&family=Figtree:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+/* Dark mode por classe no <html> (e não só por prefers-color-scheme),
+   para que o usuário possa escolher o tema manualmente. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Tokens do design system "Organic": ground creme/sand, acento terracota,
+   segundo acento sage, títulos em Caprasimo sobre corpo em Figtree, formas
+   bem arredondadas. As rampas de cor (accent/accent-2) são as mesmas nos
+   dois temas — só o fundo/superfície/texto trocam no .dark. */
+:root {
+  color-scheme: light;
+
+  --surface:         #f5ead8;
+  --surface-raised:  #ebddc5;
+  --content:         #201e1d;
+  --content-muted:   rgba(32, 30, 29, 0.55);
+  --heading:         #201e1d;
+  --line:            rgba(32, 30, 29, 0.16);
+}
+
+.dark {
+  color-scheme: dark;
+
+  --surface:         #221d19;
+  --surface-raised:  #2b2521;
+  --content:         #f2e7d5;
+  --content-muted:   rgba(242, 231, 213, 0.55);
+  --heading:         #f2e7d5;
+  --line:            rgba(242, 231, 213, 0.14);
+}
+
+@theme {
+  --font-heading: "Caprasimo", Georgia, serif;
+  --font-body:    "Figtree", system-ui, sans-serif;
+
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 28px;
+
+  --shadow-sm: 0 1px 2px rgba(46, 43, 37, 0.14);
+  --shadow-md: 0 3px 10px rgba(46, 43, 37, 0.16);
+  --shadow-lg: 0 12px 32px rgba(46, 43, 37, 0.22);
+
+  --color-accent-100: #fff2eb;
+  --color-accent-200: #ffe1d0;
+  --color-accent-300: #ffc6a5;
+  --color-accent-400: #f6a06b;
+  --color-accent-500: #d67f48;
+  --color-accent-600: #b2622d;
+  --color-accent-700: #8c491a;
+  --color-accent-800: #643312;
+  --color-accent-900: #402310;
+  --color-accent:     #c67139;
+
+  --color-accent-2-100: #f0fae1;
+  --color-accent-2-200: #e1eecc;
+  --color-accent-2-300: #ccdbb2;
+  --color-accent-2-400: #aebf92;
+  --color-accent-2-500: #8fa073;
+  --color-accent-2-600: #728157;
+  --color-accent-2-700: #56633f;
+  --color-accent-2-800: #3d472b;
+  --color-accent-2-900: #272e1b;
+  --color-accent-2:     #7a8a5e;
+
+  /* Tokens semânticos: mudam de valor conforme o tema ativo. */
+  --color-surface:          var(--surface);
+  --color-surface-raised:   var(--surface-raised);
+  --color-content:          var(--content);
+  --color-content-muted:    var(--content-muted);
+  --color-heading:          var(--heading);
+  --color-line:             var(--line);
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--surface);
+  color: var(--content);
+  font-family: var(--font-body);
+  font-size: 15px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  margin: 0;
+  color: var(--color-heading);
+}
+
+:focus { outline: none; }
+:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+::selection { background: color-mix(in srgb, var(--color-accent) 30%, transparent); }
+
+/* ══════════════════════════════════════════════════════════════════════
+   Componentes do design system "Organic" — classes prontas, para usar
+   direto no JSX (className="btn btn-primary" etc.) em vez de recriar em
+   utilitários soltos. Portado de styles.css do design system, com as
+   cores apontando para os tokens semânticos acima (funciona em claro e
+   escuro sem precisar de dark: em cada uso).
+
+   Em @layer components para que utilitários do Tailwind (ex: flex-row,
+   items-center) combinados na mesma tag sempre vençam na cascata,
+   independente da ordem das classes no className.
+   ══════════════════════════════════════════════════════════════════════ */
+
+@layer components {
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  cursor: pointer; text-decoration: none; border-radius: 999px;
+  font-family: var(--font-heading); font-weight: 400; font-size: 14px; line-height: 1.2;
+  color: var(--color-content);
+  background: transparent; border: 1px solid transparent;
+  padding: 10px 18px;
+  transition: background-color 0.15s ease;
+}
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn-primary { background: var(--color-accent); color: var(--color-surface); }
+.btn-primary:hover { background: var(--color-accent-600); }
+.btn-primary:active { background: var(--color-accent-700); }
+.btn-secondary { border-color: var(--color-line); }
+.btn-secondary:hover { background: color-mix(in srgb, var(--color-content) 7%, transparent); }
+.btn-secondary:active { background: color-mix(in srgb, var(--color-content) 14%, transparent); }
+.btn-ghost { color: var(--color-accent); padding-inline: 6px; }
+.btn-ghost:hover { background: color-mix(in srgb, var(--color-accent) 10%, transparent); }
+.btn-ghost:active { background: color-mix(in srgb, var(--color-accent) 18%, transparent); }
+.btn-icon { width: 36px; height: 36px; padding: 0; }
+.btn-block { width: 100%; }
+
+.field > label {
+  display: block; font-size: 12px; font-weight: 600; margin-bottom: 5px;
+  color: color-mix(in srgb, var(--color-content) 70%, transparent);
+}
+.input {
+  width: 100%; min-height: 40px; padding: 8px 16px; font: inherit;
+  font-size: 14px; color: var(--color-content); caret-color: var(--color-accent);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-line); border-radius: 999px;
+}
+.input:hover { border-color: color-mix(in srgb, var(--color-content) 45%, transparent); }
+.input:focus-visible { border-color: var(--color-accent); outline-offset: 0; }
+textarea.input { min-height: 90px; border-radius: var(--radius-md); resize: vertical; }
+
+.seg {
+  display: inline-flex; overflow: hidden;
+  border: 1px solid var(--color-line); border-radius: 999px;
+}
+.seg-opt {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 14px; font-size: 13px; cursor: pointer;
+}
+.seg-opt + .seg-opt { border-left: 1px solid var(--color-line); }
+.seg-opt:has(input:checked) { background: var(--color-content); color: var(--color-surface); }
+.seg-opt:not(:has(input:checked)):hover { background: color-mix(in srgb, var(--color-content) 7%, transparent); }
+.seg-opt input { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+
+.card {
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 14px; border-radius: calc(var(--radius-lg) * 1.15);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-line);
+}
+.card-title { font-family: var(--font-heading); font-size: 17px; line-height: 1.2; }
+.card-meta { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--color-content-muted); }
+.elev-sm { box-shadow: var(--shadow-sm); }
+.elev-md { box-shadow: var(--shadow-md); }
+.elev-lg { box-shadow: var(--shadow-lg); }
+
+.tag {
+  display: inline-flex; align-items: center; font-size: 11px; font-weight: 600;
+  letter-spacing: 0.02em; padding: 4px 11px; border-radius: 999px;
+}
+.tag-accent { background: var(--color-accent-100); color: var(--color-accent-800); }
+.tag-accent-2 { background: var(--color-accent-2-100); color: var(--color-accent-2-800); }
+.tag-neutral { background: color-mix(in srgb, var(--color-content) 10%, transparent); color: var(--color-content); }
+.tag-outline { border: 1px solid var(--color-accent); color: var(--color-accent); }
+
+/* Nomeada ds-table (não "table") para não colidir com o utilitário
+   nativo do Tailwind `.table { display: table }`, que venceria a
+   cascata e quebraria o `hidden`/`md:table` no breakpoint responsivo. */
+.ds-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.ds-table th {
+  text-align: left; font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--color-content-muted);
+  padding: 8px; border-bottom: 1px solid var(--color-line);
+}
+.ds-table td { padding: 11px 8px; border-bottom: 1px solid var(--color-line); }
+.ds-table tbody tr:hover { background: color-mix(in srgb, var(--color-content) 4%, transparent); cursor: pointer; }
+
+.dialog-backdrop {
+  position: fixed; inset: 0; z-index: 50; display: grid; place-items: center;
+  padding: 17px;
+  background: color-mix(in srgb, #2e2b25 50%, transparent);
+}
+.dialog {
+  width: min(440px, 100%); max-height: calc(100vh - 34px); overflow-y: auto;
+  display: flex; flex-direction: column; gap: 13px;
+  padding: 22px; border-radius: calc(var(--radius-lg) * 1.15);
+  background: var(--color-surface-raised); box-shadow: var(--shadow-lg);
+}
+.dialog-title { font-family: var(--font-heading); font-size: 20px; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+
+}
