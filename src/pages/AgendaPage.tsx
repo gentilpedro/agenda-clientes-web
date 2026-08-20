@@ -12,7 +12,7 @@ export function AgendaPage() {
   const [dia, setDia] = useState(() => new Date());
   const [agendamentos, setAgendamentos] = useState<Agendamento[]>([]);
   const [clientes, setClientes] = useState<Cliente[]>([]);
-  const [carregando, setCarregando] = useState(true);
+  const [diaCarregado, setDiaCarregado] = useState<string | null>(null);
   const [dialogAberto, setDialogAberto] = useState(false);
 
   useEffect(() => {
@@ -20,13 +20,26 @@ export function AgendaPage() {
   }, []);
 
   useEffect(() => {
-    setCarregando(true);
+    let ignore = false;
+    const diaBuscado = toLocalDateInput(dia);
     agendamentosService
-      .listarPorData(toLocalDateInput(dia))
-      .then((lista) => setAgendamentos(lista.sort((a, b) => a.dataHora.localeCompare(b.dataHora))))
-      .catch(() => setAgendamentos([]))
-      .finally(() => setCarregando(false));
+      .listarPorData(diaBuscado)
+      .then((lista) => {
+        if (ignore) return;
+        setAgendamentos(lista.sort((a, b) => a.dataHora.localeCompare(b.dataHora)));
+        setDiaCarregado(diaBuscado);
+      })
+      .catch(() => {
+        if (ignore) return;
+        setAgendamentos([]);
+        setDiaCarregado(diaBuscado);
+      });
+    return () => {
+      ignore = true;
+    };
   }, [dia]);
+
+  const carregando = diaCarregado !== toLocalDateInput(dia);
 
   function nomeCliente(clienteId: string) {
     return clientes.find((c) => c.id === clienteId)?.nome ?? '—';
