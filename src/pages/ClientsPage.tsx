@@ -4,9 +4,11 @@ import { useNavigate } from 'react-router-dom';
 
 import { ClientFormDialog } from '../components/ClientFormDialog';
 import { ErrorState } from '../components/ErrorState';
+import { agendamentosService } from '../services/agendamentos';
 import { mensagemDoErro } from '../services/api';
 import { clientesService } from '../services/clientes';
-import type { Cliente } from '../types/api';
+import type { Agendamento, Cliente } from '../types/api';
+import { formatHora } from '../utils/date';
 
 /**
  * Resultado da busca. A chave é o número da tentativa: enquanto não bate com a
@@ -25,6 +27,7 @@ export function ClientsPage() {
   const [busca, setBusca] = useState('');
   const [tentativa, setTentativa] = useState(0);
   const [dialogAberto, setDialogAberto] = useState(false);
+  const [agendamentos, setAgendamentos] = useState<Agendamento[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -48,6 +51,10 @@ export function ClientsPage() {
     };
   }, [tentativa]);
 
+  useEffect(() => {
+    agendamentosService.listar().then(setAgendamentos).catch(() => setAgendamentos([]));
+  }, [tentativa]);
+
   const carregando = resultado?.chave !== tentativa;
   const clientes = carregando ? SEM_CLIENTES : resultado.lista;
   const erro = carregando ? null : resultado.erro;
@@ -62,6 +69,24 @@ export function ClientsPage() {
         c.telefone.includes(termo),
     );
   }, [busca, clientes]);
+
+  /** Próxima sessão agendada de cada cliente (a mais próxima), pra coluna da tabela. */
+  const proximaSessaoPorCliente = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const a of agendamentos) {
+      if (a.status !== 'AGENDADO') continue;
+      const atual = map.get(a.clienteId);
+      if (!atual || a.dataHora < atual) map.set(a.clienteId, a.dataHora);
+    }
+    return map;
+  }, [agendamentos]);
+
+  function formatProximaSessao(clienteId: string) {
+    const dataHora = proximaSessaoPorCliente.get(clienteId);
+    if (!dataHora) return '—';
+    const data = new Date(dataHora);
+    return `${data.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}, ${formatHora(dataHora)}`;
+  }
 
   return (
     <div className="flex flex-col gap-5 min-h-[calc(100vh-8rem)] md:min-h-[calc(100vh-9rem)]">
@@ -117,14 +142,23 @@ export function ClientsPage() {
                 <th>Nome</th>
                 <th>Email</th>
                 <th>Telefone</th>
+                <th>Próxima sessão</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
               {filtrados.map((c) => (
                 <tr key={c.id} onClick={() => navigate(`/clientes/${c.id}`)}>
-                  <td className="font-semibold">{c.nome}</td>
+                  <td>
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className="w-6 h-6 rounded-full bg-accent-2-200 dark:bg-accent-2-800 flex-none" />
+                      <span className="font-semibold truncate">{c.nome}</span>
+                    </div>
+                  </td>
                   <td className="text-content-muted">{c.email || '—'}</td>
                   <td className="text-content-muted">{c.telefone}</td>
+                  <td className="text-content-muted">{formatProximaSessao(c.id)}</td>
+                  <td className="text-content-muted">›</td>
                 </tr>
               ))}
             </tbody>
