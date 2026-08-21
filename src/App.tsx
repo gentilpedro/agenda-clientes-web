@@ -6,7 +6,6 @@ import { AuthProvider } from './contexts/AuthProvider';
 import { ThemeProvider } from './contexts/ThemeProvider';
 import { AgendaPage } from './pages/AgendaPage';
 import { ClientDetailPage } from './pages/ClientDetailPage';
-import { ClientFormPage } from './pages/ClientFormPage';
 import { ClientsPage } from './pages/ClientsPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { LandingPage } from './pages/LandingPage';
@@ -31,9 +30,7 @@ export default function App() {
               <Route element={<Layout />}>
                 <Route path="/agenda" element={<AgendaPage />} />
                 <Route path="/clientes" element={<ClientsPage />} />
-                <Route path="/clientes/novo" element={<ClientFormPage />} />
                 <Route path="/clientes/:id" element={<ClientDetailPage />} />
-                <Route path="/clientes/:id/editar" element={<ClientFormPage />} />
               </Route>
             </Route>
 

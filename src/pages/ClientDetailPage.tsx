@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
+import { ClientFormDialog } from '../components/ClientFormDialog';
 import { ErrorState } from '../components/ErrorState';
 import { NewAppointmentDialog } from '../components/NewAppointmentDialog';
 import { StatusPill } from '../components/StatusPill';
@@ -28,6 +29,7 @@ export function ClientDetailPage() {
   const [resultado, setResultado] = useState<ClienteCarregado | null>(null);
   const [erroAcao, setErroAcao] = useState<string | null>(null);
   const [dialogAberto, setDialogAberto] = useState(false);
+  const [editDialogAberto, setEditDialogAberto] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -99,9 +101,9 @@ export function ClientDetailPage() {
             Cliente desde {new Date(cliente.criadoEm).toLocaleDateString('pt-BR')}
           </p>
         </div>
-        <Link to={`/clientes/${id}/editar`} className="btn btn-ghost">
+        <button className="btn btn-ghost" onClick={() => setEditDialogAberto(true)}>
           Editar
-        </Link>
+        </button>
       </div>
 
       <div className="flex flex-col gap-1 text-sm text-content-muted">
@@ -155,6 +157,17 @@ export function ClientDetailPage() {
               atual ? { ...atual, historico: [criado, ...atual.historico] } : atual,
             );
             setDialogAberto(false);
+          }}
+        />
+      )}
+
+      {editDialogAberto && (
+        <ClientFormDialog
+          cliente={cliente}
+          onClose={() => setEditDialogAberto(false)}
+          onSaved={(salvo) => {
+            setResultado((atual) => (atual ? { ...atual, cliente: salvo } : atual));
+            setEditDialogAberto(false);
           }}
         />
       )}
