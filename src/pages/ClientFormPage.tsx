@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import { ErrorState } from '../components/ErrorState';
 import { clientesService } from '../services/clientes';
 import { ApiRequestError, mensagemDoErro } from '../services/api';
+import { formatTelefone } from '../utils/phone';
 
 export function ClientFormPage() {
   const { id } = useParams();
@@ -32,7 +34,7 @@ export function ClientFormPage() {
         if (ignore) return;
         setNome(cliente.nome);
         setEmail(cliente.email ?? '');
-        setTelefone(cliente.telefone);
+        setTelefone(formatTelefone(cliente.telefone));
         setObservacoes(cliente.observacoes ?? '');
         setCarga({ chave, erro: null });
       })
@@ -87,6 +89,9 @@ export function ClientFormPage() {
   return (
     <div className="flex flex-col gap-5 max-w-xl">
       <div>
+        <Link to="/clientes" className="btn btn-ghost btn-icon -ml-2 mb-1">
+          <ArrowLeft size={18} />
+        </Link>
         <p className="text-xs text-content-muted mb-1">Clientes › {isEdit ? 'Editar' : 'Novo'}</p>
         <h1 className="text-2xl md:text-3xl">{isEdit ? 'Editar cliente' : 'Novo cliente'}</h1>
       </div>
@@ -114,9 +119,11 @@ export function ClientFormPage() {
           <label>Telefone</label>
           <input
             className="input"
+            type="tel"
+            inputMode="tel"
             value={telefone}
-            onChange={(e) => setTelefone(e.target.value)}
-            placeholder="+55 11 99999-9999"
+            onChange={(e) => setTelefone(formatTelefone(e.target.value))}
+            placeholder="(11) 99999-9999"
             required
           />
           {erros.telefone && <p className="text-xs text-accent-700 dark:text-accent-300 mt-1">{erros.telefone}</p>}

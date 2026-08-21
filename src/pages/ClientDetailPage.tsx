@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { ArrowLeft } from 'lucide-react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import { ErrorState } from '../components/ErrorState';
@@ -91,6 +92,10 @@ export function ClientDetailPage() {
 
   return (
     <div className="flex flex-col gap-5 max-w-xl">
+      <Link to="/clientes" className="btn btn-ghost btn-icon -ml-2 self-start">
+        <ArrowLeft size={18} />
+      </Link>
+
       <div className="flex items-start gap-3">
         <span className="w-11 h-11 rounded-full bg-accent-2-200 dark:bg-accent-2-800 flex-none" />
         <div className="flex-1 min-w-0">
