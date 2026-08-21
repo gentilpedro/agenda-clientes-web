@@ -2,21 +2,53 @@ import { useEffect, useMemo, useState } from 'react';
 import { Plus, Search } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
+import { ErrorState } from '../components/ErrorState';
+import { mensagemDoErro } from '../services/api';
 import { clientesService } from '../services/clientes';
 import type { Cliente } from '../types/api';
 
+/**
+ * Resultado da busca. A chave é o número da tentativa: enquanto não bate com a
+ * atual, a tela está carregando — loading derivado, sem setState no efeito.
+ */
+const SEM_CLIENTES: Cliente[] = [];
+
+interface ClientesCarregados {
+  chave: number;
+  lista: Cliente[];
+  erro: string | null;
+}
+
 export function ClientsPage() {
-  const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [resultado, setResultado] = useState<ClientesCarregados | null>(null);
   const [busca, setBusca] = useState('');
-  const [carregando, setCarregando] = useState(true);
+  const [tentativa, setTentativa] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
+    let ignore = false;
+    const chave = tentativa;
     clientesService
       .listar()
-      .then(setClientes)
-      .finally(() => setCarregando(false));
-  }, []);
+      .then((lista) => {
+        if (!ignore) setResultado({ chave, lista, erro: null });
+      })
+      .catch((err: unknown) => {
+        if (ignore) return;
+        setResultado({
+          chave,
+          lista: [],
+          erro: mensagemDoErro(err, 'Não foi possível carregar os clientes.'),
+        });
+      });
+    return () => {
+      ignore = true;
+    };
+  }, [tentativa]);
+
+  const carregando = resultado?.chave !== tentativa;
+  const clientes = carregando ? SEM_CLIENTES : resultado.lista;
+  const erro = carregando ? null : resultado.erro;
 
   const filtrados = useMemo(() => {
     const termo = busca.trim().toLowerCase();
@@ -53,7 +85,13 @@ export function ClientsPage() {
 
       {carregando && <p className="text-content-muted text-sm">Carregando…</p>}
 
-      {!carregando && filtrados.length === 0 && (
+      {erro && (
+        <div className="flex-1 flex items-center justify-center">
+          <ErrorState mensagem={erro} onTentarDeNovo={() => setTentativa((n) => n + 1)} />
+        </div>
+      )}
+
+      {!carregando && !erro && filtrados.length === 0 && (
         <div className="flex-1 flex items-center justify-center">
           <div className="card items-center text-center py-10 gap-2 border-dashed max-w-md w-full">
             <p className="font-semibold">{clientes.length === 0 ? 'Nenhum cliente ainda' : 'Nada encontrado'}</p>

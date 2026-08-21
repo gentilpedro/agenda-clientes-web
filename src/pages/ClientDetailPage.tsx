@@ -1,40 +1,92 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
+import { ErrorState } from '../components/ErrorState';
 import { NewAppointmentDialog } from '../components/NewAppointmentDialog';
 import { StatusPill } from '../components/StatusPill';
 import { agendamentosService } from '../services/agendamentos';
+import { mensagemDoErro } from '../services/api';
 import { clientesService } from '../services/clientes';
 import type { Agendamento, Cliente } from '../types/api';
+
+/**
+ * Cliente + histórico de uma tentativa de carga. A chave é o número da
+ * tentativa: enquanto não bate com a atual, a tela está carregando — loading
+ * derivado, sem setState no efeito.
+ */
+interface ClienteCarregado {
+  chave: number;
+  cliente: Cliente | null;
+  historico: Agendamento[];
+  erro: string | null;
+}
 
 export function ClientDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [cliente, setCliente] = useState<Cliente | null>(null);
-  const [historico, setHistorico] = useState<Agendamento[]>([]);
+  const [tentativa, setTentativa] = useState(0);
+  const [resultado, setResultado] = useState<ClienteCarregado | null>(null);
+  const [erroAcao, setErroAcao] = useState<string | null>(null);
   const [dialogAberto, setDialogAberto] = useState(false);
 
   useEffect(() => {
     if (!id) return;
-    clientesService.buscarPorId(id).then(setCliente);
-    agendamentosService.listar().then((todos) =>
-      setHistorico(
-        todos
-          .filter((a) => a.clienteId === id)
-          .sort((a, b) => b.dataHora.localeCompare(a.dataHora)),
-      ),
-    );
-  }, [id]);
+    let ignore = false;
+    const chave = tentativa;
+    Promise.all([clientesService.buscarPorId(id), agendamentosService.listar()])
+      .then(([encontrado, todos]) => {
+        if (ignore) return;
+        setResultado({
+          chave,
+          cliente: encontrado,
+          historico: todos
+            .filter((a) => a.clienteId === id)
+            .sort((a, b) => b.dataHora.localeCompare(a.dataHora)),
+          erro: null,
+        });
+      })
+      .catch((err: unknown) => {
+        if (ignore) return;
+        setResultado({
+          chave,
+          cliente: null,
+          historico: [],
+          erro: mensagemDoErro(err, 'Não foi possível carregar este cliente.'),
+        });
+      });
+    return () => {
+      ignore = true;
+    };
+  }, [id, tentativa]);
+
+  const carregando = Boolean(id) && resultado?.chave !== tentativa;
+  const cliente = carregando ? null : resultado?.cliente ?? null;
+  const historico = carregando ? [] : resultado?.historico ?? [];
+  const erroCarga = carregando ? null : resultado?.erro ?? null;
 
   async function excluirCliente() {
     if (!id) return;
     if (!window.confirm(`Remover ${cliente?.nome}? Isso não pode ser desfeito.`)) return;
-    await clientesService.remover(id);
-    navigate('/clientes');
+    setErroAcao(null);
+    try {
+      await clientesService.remover(id);
+      navigate('/clientes');
+    } catch (err) {
+      setErroAcao(mensagemDoErro(err, 'Não foi possível remover o cliente.'));
+    }
+  }
+
+  if (carregando) {
+    return <p className="text-content-muted text-sm">Carregando…</p>;
   }
 
   if (!id || !cliente) {
-    return <p className="text-content-muted text-sm">Carregando…</p>;
+    return (
+      <ErrorState
+        mensagem={erroCarga ?? 'Cliente não encontrado.'}
+        onTentarDeNovo={id ? () => setTentativa((n) => n + 1) : undefined}
+      />
+    );
   }
 
   return (
@@ -78,6 +130,12 @@ export function ClientDetailPage() {
         ))}
       </div>
 
+      {erroAcao && (
+        <p role="alert" className="text-sm text-accent-700 dark:text-accent-300">
+          {erroAcao}
+        </p>
+      )}
+
       <div className="flex gap-2">
         <button className="btn btn-primary flex-1" onClick={() => setDialogAberto(true)}>
           Agendar próxima sessão
@@ -93,7 +151,9 @@ export function ClientDetailPage() {
           initialClienteId={cliente.id}
           onClose={() => setDialogAberto(false)}
           onCreated={(criado) => {
-            setHistorico((lista) => [criado, ...lista]);
+            setResultado((atual) =>
+              atual ? { ...atual, historico: [criado, ...atual.historico] } : atual,
+            );
             setDialogAberto(false);
           }}
         />
