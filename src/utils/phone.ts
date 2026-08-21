@@ -1,5 +1,13 @@
-/** Formata dígitos de telefone BR progressivamente: (XX) XXXX-XXXX (fixo) ou (XX) XXXXX-XXXX (celular). */
+/**
+ * Formata dígitos de telefone BR progressivamente: (XX) XXXX-XXXX (fixo) ou
+ * (XX) XXXXX-XXXX (celular). Um "+" no início indica número estrangeiro —
+ * nesse caso não força o padrão brasileiro, só limita a caracteres válidos.
+ */
 export function formatTelefone(value: string): string {
+  if (value.trimStart().startsWith('+')) {
+    return value.replace(/[^\d+()\-\s]/g, '').slice(0, 20);
+  }
+
   const digits = value.replace(/\D/g, '').slice(0, 11);
   if (digits.length === 0) return '';
 
