@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Plus, Search } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
+import { ClientFormDialog } from '../components/ClientFormDialog';
 import { ErrorState } from '../components/ErrorState';
 import { mensagemDoErro } from '../services/api';
 import { clientesService } from '../services/clientes';
@@ -23,6 +24,7 @@ export function ClientsPage() {
   const [resultado, setResultado] = useState<ClientesCarregados | null>(null);
   const [busca, setBusca] = useState('');
   const [tentativa, setTentativa] = useState(0);
+  const [dialogAberto, setDialogAberto] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -66,9 +68,9 @@ export function ClientsPage() {
       <div className="flex items-center gap-3 flex-wrap">
         <h1 className="text-2xl md:text-3xl">Clientes</h1>
         <span className="text-sm text-content-muted">{clientes.length} ao todo</span>
-        <Link to="/clientes/novo" className="btn btn-primary ml-auto">
+        <button className="btn btn-primary ml-auto" onClick={() => setDialogAberto(true)}>
           <Plus size={16} /> Novo cliente
-        </Link>
+        </button>
       </div>
 
       <div className="field max-w-md">
@@ -98,9 +100,9 @@ export function ClientsPage() {
             {clientes.length === 0 && (
               <>
                 <p className="text-sm text-content-muted">Cadastre o primeiro cliente pra começar.</p>
-                <Link to="/clientes/novo" className="btn btn-primary mt-2">
+                <button className="btn btn-primary mt-2" onClick={() => setDialogAberto(true)}>
                   <Plus size={16} /> Novo cliente
-                </Link>
+                </button>
               </>
             )}
           </div>
@@ -144,6 +146,16 @@ export function ClientsPage() {
             ))}
           </div>
         </>
+      )}
+
+      {dialogAberto && (
+        <ClientFormDialog
+          onClose={() => setDialogAberto(false)}
+          onSaved={(salvo) => {
+            setDialogAberto(false);
+            navigate(`/clientes/${salvo.id}`);
+          }}
+        />
       )}
     </div>
   );
