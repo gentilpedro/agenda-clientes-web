@@ -15,6 +15,11 @@ export function formatHora(iso: string): string {
   return new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 }
 
+/** Hora local (0-23) do horário de um agendamento, pra agrupar na timeline. */
+export function getLocalHour(iso: string): number {
+  return new Date(iso).getHours();
+}
+
 export function isSameLocalDay(iso: string, date: Date): boolean {
   return toLocalDateInput(new Date(iso)) === toLocalDateInput(date);
 }
