@@ -35,7 +35,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   function persistirSessao(resposta: AuthResponse) {
     api.setToken(resposta.token);
-    const logado: Usuario = { id: resposta.id, nome: resposta.nome, email: resposta.email };
+    const logado: Usuario = { id: resposta.id };
     localStorage.setItem(USUARIO_STORAGE_KEY, JSON.stringify(logado));
     setUsuario(logado);
   }

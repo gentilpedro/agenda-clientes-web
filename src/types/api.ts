@@ -32,10 +32,14 @@ export interface AgendamentoInput {
   observacoes?: string;
 }
 
+/**
+ * Sessão local do usuário logado. Guarda só o id — nome e email não são
+ * exibidos em lugar nenhum da UI hoje, e o e-mail já fica no payload do JWT
+ * (que tampouco é criptografado); não há motivo pra duplicar essa
+ * informação em texto plano no localStorage.
+ */
 export interface Usuario {
   id: string;
-  nome: string;
-  email: string;
 }
 
 export interface AuthResponse {
