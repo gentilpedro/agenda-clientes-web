@@ -9,7 +9,9 @@ export function LandingPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <header className="flex items-center gap-2 px-6 py-5 md:px-10">
-        <span className="w-8 h-8 rounded-full bg-accent" />
+        <span className="w-8 h-8 rounded-full overflow-hidden shrink-0">
+          <img src="/favicon.png" alt="Agenda" className="w-full h-full object-cover" />
+        </span>
         <span className="font-heading text-lg">Agenda</span>
         <div className="ml-auto flex gap-2">
           {usuario ? (
