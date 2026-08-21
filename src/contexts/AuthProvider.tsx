@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 
 import { api } from '../services/api';
 import { authService } from '../services/auth';
@@ -6,6 +6,12 @@ import type { AuthResponse, Usuario } from '../types/api';
 import { AuthContext, USUARIO_STORAGE_KEY } from './auth-context';
 
 function readStoredUsuario(): Usuario | null {
+  // Sem token não há sessão: o usuário guardado sozinho só levaria a telas
+  // protegidas que a API recusaria em seguida.
+  if (!api.hasToken()) {
+    localStorage.removeItem(USUARIO_STORAGE_KEY);
+    return null;
+  }
   try {
     const raw = localStorage.getItem(USUARIO_STORAGE_KEY);
     return raw ? (JSON.parse(raw) as Usuario) : null;
@@ -16,6 +22,16 @@ function readStoredUsuario(): Usuario | null {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [usuario, setUsuario] = useState<Usuario | null>(readStoredUsuario);
+
+  // A API recusa tokens expirados/inválidos; quando isso acontece a sessão cai
+  // aqui e o ProtectedRoute leva o usuário de volta ao login.
+  useEffect(() => {
+    api.setSessionExpiredHandler(() => {
+      localStorage.removeItem(USUARIO_STORAGE_KEY);
+      setUsuario(null);
+    });
+    return () => api.setSessionExpiredHandler(null);
+  }, []);
 
   function persistirSessao(resposta: AuthResponse) {
     api.setToken(resposta.token);

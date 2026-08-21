@@ -7,7 +7,7 @@ export const agendamentosService = {
   buscarPorId: (id: string) => api.get<Agendamento>(`/agendamentos/${id}`),
   criar: (input: AgendamentoInput) => api.post<Agendamento>('/agendamentos', input),
   atualizar: (id: string, input: AgendamentoInput) => api.put<Agendamento>(`/agendamentos/${id}`, input),
-  cancelar: (id: string) => api.request<Agendamento>(`/agendamentos/${id}/cancelar`, { method: 'PATCH' }),
-  concluir: (id: string) => api.request<Agendamento>(`/agendamentos/${id}/concluir`, { method: 'PATCH' }),
+  cancelar: (id: string) => api.patch<Agendamento>(`/agendamentos/${id}/cancelar`),
+  concluir: (id: string) => api.patch<Agendamento>(`/agendamentos/${id}/concluir`),
   remover: (id: string) => api.delete<void>(`/agendamentos/${id}`),
 };

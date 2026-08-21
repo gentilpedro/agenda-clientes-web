@@ -10,7 +10,7 @@ Template base para projetos front-end React + Vite.
 - [lucide-react](https://lucide.dev/) para ícones
 - Tema claro/escuro já pronto (ver [Tema claro/escuro](#tema-claroescuro))
 - ESLint (flat config) com `typescript-eslint`, `eslint-plugin-react-hooks` e `eslint-plugin-react-refresh`
-- `src/services/api.ts`: client HTTP mínimo (fetch) com suporte a token Bearer, pronto para apontar para uma API .NET (`VITE_API_URL`)
+- `src/services/api.ts`: client HTTP mínimo (fetch) com suporte a token Bearer, apontando para a `agenda-clientes-api` (`VITE_API_URL`)
 
 ## Como criar um projeto novo
 
@@ -27,11 +27,47 @@ npm run dev
 
 1. Use este repositório como template no GitHub ("Use this template") ou clone.
 2. Renomeie o campo `name` em `package.json`.
-3. Copie `.env.example` para `.env` e ajuste `VITE_API_URL`.
+3. Copie `.env.example` para `.env` e ajuste `VITE_API_URL` (ver [Backend](#backend-agenda-clientes-api)).
 4. `npm install`
 5. `npm run dev` (abre em `http://localhost:3000`)
 
 O pacote `create-gentilpedro-react` (pasta `create-app/`) é publicado a partir deste mesmo repositório — sempre que a `main` muda, o CI sincroniza o template e publica uma versão nova no npm.
+
+## Backend (agenda-clientes-api)
+
+O app consome a **agenda-clientes-api** (Java 21 + Spring Boot), no repositório
+`agenda-clientes-api`. Para rodar os dois juntos em desenvolvimento:
+
+```
+# no repositório da API
+docker compose up -d      # Postgres; o Flyway aplica as migrations no start
+./mvnw spring-boot:run    # sobe em http://localhost:8080
+
+# aqui
+cp .env.example .env      # VITE_API_URL=http://localhost:8080/api
+npm install
+npm run dev               # abre em http://localhost:3000
+```
+
+Detalhes da integração:
+
+- **Endereço da API**: `VITE_API_URL` (padrão `http://localhost:8080/api`). O
+  valor precisa incluir o prefixo `/api` — os services montam os caminhos a
+  partir dele (`/auth/login`, `/clientes`, `/agendamentos`).
+- **CORS**: a API libera `http://localhost:3000`, que é a porta fixada em
+  `vite.config.ts`. Se mudar a porta do Vite, ajuste `app.cors.allowed-origins`
+  na API (ou a env `APP_CORS_ALLOWED_ORIGINS`).
+- **Autenticação**: JWT no header `Authorization: Bearer <token>`, guardado em
+  `localStorage`. O token vem de `POST /api/auth/login` ou `/api/auth/registrar`.
+- **Sessão expirada**: a API usa Spring Security, que responde **403** (e não
+  401) quando o token está ausente, expirado ou inválido. O client trata 401 e
+  403 dos endpoints protegidos como sessão encerrada, limpa o `localStorage` e
+  deixa o `ProtectedRoute` levar de volta ao login. Nos endpoints `/auth/*` o
+  401 é credencial inválida e fica com o formulário.
+- **Erros**: a API devolve o formato `ApiError` (`message` + `fieldErrors`), que
+  vira `ApiRequestError` no client — os formulários usam `fieldErrors` para
+  marcar campo a campo.
+- **Documentação**: Swagger UI em `http://localhost:8080/swagger-ui.html`.
 
 ## Scripts
 

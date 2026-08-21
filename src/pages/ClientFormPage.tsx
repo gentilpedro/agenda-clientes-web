@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
+import { ErrorState } from '../components/ErrorState';
 import { clientesService } from '../services/clientes';
-import { ApiRequestError } from '../services/api';
+import { ApiRequestError, mensagemDoErro } from '../services/api';
 
 export function ClientFormPage() {
   const { id } = useParams();
@@ -16,18 +17,36 @@ export function ClientFormPage() {
   const [erros, setErros] = useState<Record<string, string>>({});
   const [erroGeral, setErroGeral] = useState<string | null>(null);
   const [salvando, setSalvando] = useState(false);
-  const [carregando, setCarregando] = useState(isEdit);
+  const [tentativa, setTentativa] = useState(0);
+  // Chave da tentativa que terminou de carregar; enquanto não bate com a atual,
+  // o formulário está carregando — loading derivado, sem setState no efeito.
+  const [carga, setCarga] = useState<{ chave: number; erro: string | null } | null>(null);
 
   useEffect(() => {
     if (!id) return;
-    clientesService.buscarPorId(id).then((cliente) => {
-      setNome(cliente.nome);
-      setEmail(cliente.email ?? '');
-      setTelefone(cliente.telefone);
-      setObservacoes(cliente.observacoes ?? '');
-      setCarregando(false);
-    });
-  }, [id]);
+    let ignore = false;
+    const chave = tentativa;
+    clientesService
+      .buscarPorId(id)
+      .then((cliente) => {
+        if (ignore) return;
+        setNome(cliente.nome);
+        setEmail(cliente.email ?? '');
+        setTelefone(cliente.telefone);
+        setObservacoes(cliente.observacoes ?? '');
+        setCarga({ chave, erro: null });
+      })
+      .catch((err: unknown) => {
+        if (ignore) return;
+        setCarga({ chave, erro: mensagemDoErro(err, 'Não foi possível carregar o cliente.') });
+      });
+    return () => {
+      ignore = true;
+    };
+  }, [id, tentativa]);
+
+  const carregando = isEdit && carga?.chave !== tentativa;
+  const erroCarga = carregando ? null : carga?.erro ?? null;
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -59,6 +78,10 @@ export function ClientFormPage() {
 
   if (carregando) {
     return <p className="text-content-muted text-sm">Carregando…</p>;
+  }
+
+  if (erroCarga) {
+    return <ErrorState mensagem={erroCarga} onTentarDeNovo={() => setTentativa((n) => n + 1)} />;
   }
 
   return (
