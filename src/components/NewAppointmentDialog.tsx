@@ -12,6 +12,7 @@ interface NewAppointmentDialogProps {
   clientes: Cliente[];
   initialClienteId?: string;
   initialDate?: Date;
+  initialHora?: string;
   onClose: () => void;
   onCreated: (agendamento: Agendamento) => void;
 }
@@ -20,6 +21,7 @@ export function NewAppointmentDialog({
   clientes,
   initialClienteId,
   initialDate,
+  initialHora,
   onClose,
   onCreated,
 }: NewAppointmentDialogProps) {
@@ -28,7 +30,7 @@ export function NewAppointmentDialog({
   const comboRef = useRef<HTMLDivElement>(null);
   const [clienteId, setClienteId] = useState(initialClienteId ?? '');
   const [data, setData] = useState(toLocalDateInput(initialDate ?? new Date()));
-  const [hora, setHora] = useState('09:00');
+  const [hora, setHora] = useState(initialHora ?? '09:00');
   const [duracao, setDuracao] = useState(50);
   const [observacoes, setObservacoes] = useState('');
   const [erro, setErro] = useState<string | null>(null);
