@@ -1,5 +1,5 @@
 import { CalendarDays, LogOut, Users } from 'lucide-react';
-import { NavLink, Outlet } from 'react-router-dom';
+import { Link, NavLink, Outlet } from 'react-router-dom';
 
 import { useAuth } from '../contexts/auth-context';
 import { ThemeToggle } from './ThemeToggle';
@@ -24,7 +24,9 @@ export function Layout() {
   return (
     <div className="flex min-h-screen flex-col md:flex-row">
       <header className="flex items-center gap-3 border-b border-line px-4 py-3 md:hidden">
-        <span className="w-7 h-7 rounded-full bg-accent flex-none" />
+        <Link to="/" className="flex-none">
+          <img src="/favicon.png" alt="Agenda" className="w-8 h-8" />
+        </Link>
         <span className="font-heading text-lg">Agenda</span>
         <div className="ml-auto flex items-center gap-1">
           <ThemeToggle />
@@ -40,7 +42,9 @@ export function Layout() {
       </header>
 
       <nav className="hidden md:flex w-[72px] flex-none flex-col items-center gap-4 border-r border-line bg-accent-100/40 dark:bg-accent-900/20 py-5">
-        <span className="w-7 h-7 rounded-full bg-accent" />
+        <Link to="/" title="Ir para a página inicial">
+          <img src="/favicon.png" alt="Agenda" className="w-9 h-9" />
+        </Link>
         {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
           <NavLink
             key={to}
