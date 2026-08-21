@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ArrowLeft } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../contexts/auth-context';
@@ -37,7 +38,10 @@ export function RegisterPage() {
   return (
     <div className="min-h-screen flex items-center justify-center p-6">
       <div className="w-full max-w-[340px] flex flex-col gap-5">
-        <span className="w-11 h-11 rounded-full bg-accent" />
+        <Link to="/" className="btn btn-ghost btn-icon -ml-2 self-start" aria-label="Voltar pro início">
+          <ArrowLeft size={18} />
+        </Link>
+        <img src="/favicon.png" alt="Agenda" className="w-11 h-11" />
         <h1 className="text-2xl leading-tight">Criar conta</h1>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
