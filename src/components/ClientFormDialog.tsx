@@ -96,6 +96,7 @@ export function ClientFormDialog({ cliente, onClose, onSaved }: ClientFormDialog
               placeholder="(11) 99999-9999"
               required
             />
+            <p className="text-xs text-content-muted mt-1">Número estrangeiro? Comece digitando +</p>
             {erros.telefone && <p className="text-xs text-accent-700 dark:text-accent-300 mt-1">{erros.telefone}</p>}
           </div>
 
