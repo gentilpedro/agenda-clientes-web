@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { X } from 'lucide-react';
 
 import { agendamentosService } from '../services/agendamentos';
@@ -24,6 +24,8 @@ export function NewAppointmentDialog({
   onCreated,
 }: NewAppointmentDialogProps) {
   const [busca, setBusca] = useState('');
+  const [comboAberto, setComboAberto] = useState(false);
+  const comboRef = useRef<HTMLDivElement>(null);
   const [clienteId, setClienteId] = useState(initialClienteId ?? '');
   const [data, setData] = useState(toLocalDateInput(initialDate ?? new Date()));
   const [hora, setHora] = useState('09:00');
@@ -41,6 +43,17 @@ export function NewAppointmentDialog({
   }, [busca, clientes]);
 
   const clienteSelecionado = clientes.find((c) => c.id === clienteId);
+
+  useEffect(() => {
+    if (!comboAberto) return;
+    function handleClickFora(event: MouseEvent) {
+      if (comboRef.current && !comboRef.current.contains(event.target as Node)) {
+        setComboAberto(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickFora);
+    return () => document.removeEventListener('mousedown', handleClickFora);
+  }, [comboAberto]);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -82,7 +95,7 @@ export function NewAppointmentDialog({
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="field">
+          <div className="field relative" ref={comboRef}>
             <label>Cliente</label>
             {clienteSelecionado ? (
               <div className="flex items-center gap-2 input">
@@ -99,29 +112,32 @@ export function NewAppointmentDialog({
               <>
                 <input
                   className="input"
-                  placeholder="Digite um nome…"
+                  placeholder="Digite para buscar…"
                   value={busca}
                   onChange={(e) => setBusca(e.target.value)}
-                  autoFocus
+                  onFocus={() => setComboAberto(true)}
                 />
-                <div className="mt-1 flex flex-col gap-1 border border-line rounded-2xl p-1 max-h-40 overflow-y-auto">
-                  {clientesFiltrados.length === 0 && (
-                    <p className="text-xs text-content-muted px-2 py-2">Nenhum cliente encontrado</p>
-                  )}
-                  {clientesFiltrados.map((c) => (
-                    <button
-                      type="button"
-                      key={c.id}
-                      onClick={() => {
-                        setClienteId(c.id);
-                        setBusca('');
-                      }}
-                      className="text-left text-sm px-3 py-2 rounded-xl hover:bg-accent-100 dark:hover:bg-accent-900"
-                    >
-                      {c.nome}
-                    </button>
-                  ))}
-                </div>
+                {comboAberto && (
+                  <div className="absolute top-full left-0 right-0 mt-1 z-10 flex flex-col gap-1 border border-line rounded-2xl p-1 max-h-48 overflow-y-auto bg-surface-raised elev-lg">
+                    {clientesFiltrados.length === 0 && (
+                      <p className="text-xs text-content-muted px-2 py-2">Nenhum cliente encontrado</p>
+                    )}
+                    {clientesFiltrados.map((c) => (
+                      <button
+                        type="button"
+                        key={c.id}
+                        onClick={() => {
+                          setClienteId(c.id);
+                          setBusca('');
+                          setComboAberto(false);
+                        }}
+                        className="text-left text-sm px-3 py-2 rounded-xl hover:bg-accent-100 dark:hover:bg-accent-900"
+                      >
+                        {c.nome}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </>
             )}
           </div>
