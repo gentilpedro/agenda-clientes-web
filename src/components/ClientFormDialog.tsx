@@ -1,10 +1,18 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
+import { PhoneInput } from 'react-international-phone';
+import 'react-international-phone/style.css';
 
 import { clientesService } from '../services/clientes';
 import { ApiRequestError } from '../services/api';
 import type { Cliente } from '../types/api';
-import { formatTelefone } from '../utils/phone';
+
+/** Telefones antigos foram salvos sem "+" (formato local BR). Prefixa com +55
+ * pra a lib reconhecer o país; números já internacionais passam direto. */
+function paraFormatoInternacional(telefone: string): string {
+  if (!telefone) return '';
+  return telefone.startsWith('+') ? telefone : `+55${telefone.replace(/\D/g, '')}`;
+}
 
 interface ClientFormDialogProps {
   cliente?: Cliente;
@@ -17,7 +25,7 @@ export function ClientFormDialog({ cliente, onClose, onSaved }: ClientFormDialog
 
   const [nome, setNome] = useState(cliente?.nome ?? '');
   const [email, setEmail] = useState(cliente?.email ?? '');
-  const [telefone, setTelefone] = useState(formatTelefone(cliente?.telefone ?? ''));
+  const [telefone, setTelefone] = useState(paraFormatoInternacional(cliente?.telefone ?? ''));
   const [observacoes, setObservacoes] = useState(cliente?.observacoes ?? '');
   const [erros, setErros] = useState<Record<string, string>>({});
   const [erroGeral, setErroGeral] = useState<string | null>(null);
@@ -87,16 +95,14 @@ export function ClientFormDialog({ cliente, onClose, onSaved }: ClientFormDialog
 
           <div className="field">
             <label>Telefone</label>
-            <input
-              className="input"
-              type="tel"
-              inputMode="tel"
+            <PhoneInput
+              className="phone-input"
+              inputClassName="input"
+              defaultCountry="br"
               value={telefone}
-              onChange={(e) => setTelefone(formatTelefone(e.target.value))}
-              placeholder="(11) 99999-9999"
-              required
+              onChange={setTelefone}
+              inputProps={{ required: true, name: 'telefone' }}
             />
-            <p className="text-xs text-content-muted mt-1">Número estrangeiro? Comece digitando +</p>
             {erros.telefone && <p className="text-xs text-accent-700 dark:text-accent-300 mt-1">{erros.telefone}</p>}
           </div>
 

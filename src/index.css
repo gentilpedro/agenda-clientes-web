@@ -157,6 +157,34 @@ h1, h2, h3, h4, h5, h6 {
 .input:focus-visible { border-color: var(--color-accent); outline-offset: 0; }
 textarea.input { min-height: 90px; border-radius: var(--radius-md); resize: vertical; }
 
+/* react-international-phone: mapeia as CSS vars da lib pros tokens do design system. */
+.phone-input.react-international-phone-input-container {
+  --react-international-phone-background-color: var(--color-surface-raised);
+  --react-international-phone-text-color: var(--color-content);
+  --react-international-phone-border-color: var(--color-line);
+  --react-international-phone-height: 40px;
+  --react-international-phone-font-size: 14px;
+  --react-international-phone-country-selector-background-color: var(--color-surface-raised);
+  --react-international-phone-country-selector-background-color-hover: color-mix(in srgb, var(--color-content) 7%, transparent);
+  --react-international-phone-country-selector-border-color: var(--color-line);
+  --react-international-phone-country-selector-arrow-color: var(--color-content-muted);
+  --react-international-phone-dropdown-item-background-color: var(--color-surface-raised);
+  --react-international-phone-dropdown-item-text-color: var(--color-content);
+  --react-international-phone-dropdown-item-dial-code-color: var(--color-content-muted);
+  --react-international-phone-selected-dropdown-item-background-color: var(--color-accent-100);
+  --react-international-phone-selected-dropdown-item-text-color: var(--color-accent-800);
+  --react-international-phone-selected-dropdown-item-dial-code-color: var(--color-accent-700);
+  --react-international-phone-dropdown-shadow: var(--shadow-lg);
+  width: 100%;
+}
+.phone-input .react-international-phone-country-selector-button {
+  border-radius: 999px 0 0 999px;
+}
+.phone-input .react-international-phone-input {
+  border-radius: 0 999px 999px 0;
+  flex: 1;
+}
+
 .seg {
   display: inline-flex; overflow: hidden;
   border: 1px solid var(--color-line); border-radius: 999px;
