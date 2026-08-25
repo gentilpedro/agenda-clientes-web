@@ -4,37 +4,46 @@ import { X } from 'lucide-react';
 import { agendamentosService } from '../services/agendamentos';
 import { ApiRequestError } from '../services/api';
 import type { Agendamento, Cliente } from '../types/api';
-import { toLocalDateInput } from '../utils/date';
+import { formatHora, toLocalDateInput } from '../utils/date';
 
 const DURACOES = [30, 50, 60];
 
-interface NewAppointmentDialogProps {
+interface AppointmentFormDialogProps {
   clientes: Cliente[];
+  agendamento?: Agendamento;
   initialClienteId?: string;
   initialDate?: Date;
   initialHora?: string;
   onClose: () => void;
-  onCreated: (agendamento: Agendamento) => void;
+  onSaved: (agendamento: Agendamento) => void;
+  onDeleted?: (id: string) => void;
 }
 
-export function NewAppointmentDialog({
+export function AppointmentFormDialog({
   clientes,
+  agendamento,
   initialClienteId,
   initialDate,
   initialHora,
   onClose,
-  onCreated,
-}: NewAppointmentDialogProps) {
+  onSaved,
+  onDeleted,
+}: AppointmentFormDialogProps) {
+  const isEdit = Boolean(agendamento);
+
   const [busca, setBusca] = useState('');
   const [comboAberto, setComboAberto] = useState(false);
   const comboRef = useRef<HTMLDivElement>(null);
-  const [clienteId, setClienteId] = useState(initialClienteId ?? '');
-  const [data, setData] = useState(toLocalDateInput(initialDate ?? new Date()));
-  const [hora, setHora] = useState(initialHora ?? '09:00');
-  const [duracao, setDuracao] = useState(50);
-  const [observacoes, setObservacoes] = useState('');
+  const [clienteId, setClienteId] = useState(agendamento?.clienteId ?? initialClienteId ?? '');
+  const [data, setData] = useState(
+    toLocalDateInput(agendamento ? new Date(agendamento.dataHora) : initialDate ?? new Date()),
+  );
+  const [hora, setHora] = useState(agendamento ? formatHora(agendamento.dataHora) : initialHora ?? '09:00');
+  const [duracao, setDuracao] = useState(agendamento?.duracaoMinutos ?? 50);
+  const [observacoes, setObservacoes] = useState(agendamento?.observacoes ?? '');
   const [erro, setErro] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
+  const [excluindo, setExcluindo] = useState(false);
 
   const clientesFiltrados = useMemo(() => {
     const termo = busca.trim().toLowerCase();
@@ -67,17 +76,34 @@ export function NewAppointmentDialog({
     setErro(null);
     try {
       const dataHora = new Date(`${data}T${hora}:00`).toISOString();
-      const criado = await agendamentosService.criar({
+      const input = {
         clienteId,
         dataHora,
         duracaoMinutos: duracao,
         observacoes: observacoes || undefined,
-      });
-      onCreated(criado);
+      };
+      const salvo = isEdit
+        ? await agendamentosService.atualizar(agendamento!.id, input)
+        : await agendamentosService.criar(input);
+      onSaved(salvo);
     } catch (err) {
-      setErro(err instanceof ApiRequestError ? err.message : 'Não foi possível agendar');
+      setErro(err instanceof ApiRequestError ? err.message : 'Não foi possível salvar o agendamento');
     } finally {
       setEnviando(false);
+    }
+  }
+
+  async function handleExcluir() {
+    if (!agendamento || !onDeleted) return;
+    if (!window.confirm('Excluir este agendamento? Isso não pode ser desfeito.')) return;
+    setExcluindo(true);
+    setErro(null);
+    try {
+      await agendamentosService.remover(agendamento.id);
+      onDeleted(agendamento.id);
+    } catch (err) {
+      setErro(err instanceof ApiRequestError ? err.message : 'Não foi possível excluir o agendamento');
+      setExcluindo(false);
     }
   }
 
@@ -85,7 +111,7 @@ export function NewAppointmentDialog({
     <div className="dialog-backdrop" onClick={onClose}>
       <div className="dialog" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center">
-          <h2 className="dialog-title">Novo agendamento</h2>
+          <h2 className="dialog-title">{isEdit ? 'Editar agendamento' : 'Novo agendamento'}</h2>
           <button
             type="button"
             onClick={onClose}
@@ -102,13 +128,15 @@ export function NewAppointmentDialog({
             {clienteSelecionado ? (
               <div className="flex items-center gap-2 input">
                 <span className="flex-1 truncate">{clienteSelecionado.nome}</span>
-                <button
-                  type="button"
-                  className="btn-ghost text-xs"
-                  onClick={() => setClienteId('')}
-                >
-                  trocar
-                </button>
+                {!isEdit && (
+                  <button
+                    type="button"
+                    className="btn-ghost text-xs"
+                    onClick={() => setClienteId('')}
+                  >
+                    trocar
+                  </button>
+                )}
               </div>
             ) : (
               <>
@@ -155,7 +183,7 @@ export function NewAppointmentDialog({
                 required
               />
             </div>
-            <div className="field w-28">
+            <div className="field w-36">
               <label>Hora</label>
               <input
                 type="time"
@@ -196,9 +224,21 @@ export function NewAppointmentDialog({
 
           {erro && <p className="text-sm text-accent-700 dark:text-accent-300">{erro}</p>}
 
-          <button type="submit" className="btn btn-primary btn-block" disabled={enviando}>
-            {enviando ? 'Agendando…' : 'Agendar'}
-          </button>
+          <div className="flex gap-2">
+            <button type="submit" className="btn btn-primary btn-block" disabled={enviando || excluindo}>
+              {enviando ? 'Salvando…' : isEdit ? 'Salvar' : 'Agendar'}
+            </button>
+            {isEdit && onDeleted && (
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={handleExcluir}
+                disabled={enviando || excluindo}
+              >
+                {excluindo ? 'Excluindo…' : 'Excluir'}
+              </button>
+            )}
+          </div>
         </form>
       </div>
     </div>
