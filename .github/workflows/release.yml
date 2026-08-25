@@ -18,6 +18,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -37,19 +39,46 @@ jobs:
       - name: Build
         run: npm run build
 
+      # Versão real (semver), calculada a partir dos commits desde a última
+      # tag vX.Y.Z — ver release-standards. should_release=false quando não
+      # há commit feat/fix/breaking desde a última release (nada a publicar).
+      - name: Compute next version
+        id: version
+        run: |
+          set +e
+          VERSION=$(bash .github/scripts/next-version.sh)
+          STATUS=$?
+          set -e
+          if [ $STATUS -eq 2 ]; then
+            echo "Nenhum commit feat/fix/breaking desde a última tag — pulando release."
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          elif [ $STATUS -ne 0 ]; then
+            echo "::error::Falha ao calcular a próxima versão (veja o log acima)"
+            exit 1
+          fi
+          echo "should_release=true" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
       - name: Package dist
+        if: steps.version.outputs.should_release == 'true'
         run: |
           cd dist
           zip -r ../agenda-clientes-web-dist.zip .
 
-      - name: Read project version
-        id: version
-        run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+      - name: Create tag
+        if: steps.version.outputs.should_release == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag ${{ steps.version.outputs.version }}
+          git push origin ${{ steps.version.outputs.version }}
 
       - name: Create release
+        if: steps.version.outputs.should_release == 'true'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ steps.version.outputs.version }}-${{ github.run_number }}
-          name: v${{ steps.version.outputs.version }}-${{ github.run_number }}
+          tag_name: ${{ steps.version.outputs.version }}
+          name: ${{ steps.version.outputs.version }}
           generate_release_notes: true
           files: agenda-clientes-web-dist.zip
