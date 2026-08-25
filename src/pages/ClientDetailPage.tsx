@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
+import { AppointmentFormDialog } from '../components/AppointmentFormDialog';
 import { ClientFormDialog } from '../components/ClientFormDialog';
 import { ErrorState } from '../components/ErrorState';
-import { NewAppointmentDialog } from '../components/NewAppointmentDialog';
 import { StatusPill } from '../components/StatusPill';
 import { agendamentosService } from '../services/agendamentos';
 import { mensagemDoErro } from '../services/api';
@@ -153,11 +153,11 @@ export function ClientDetailPage() {
       </div>
 
       {dialogAberto && (
-        <NewAppointmentDialog
+        <AppointmentFormDialog
           clientes={[cliente]}
           initialClienteId={cliente.id}
           onClose={() => setDialogAberto(false)}
-          onCreated={(criado) => {
+          onSaved={(criado) => {
             setResultado((atual) =>
               atual ? { ...atual, historico: [criado, ...atual.historico] } : atual,
             );

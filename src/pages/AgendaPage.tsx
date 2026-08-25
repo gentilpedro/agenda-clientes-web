@@ -1,18 +1,19 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { CalendarDays, ChevronLeft, ChevronRight, Pencil, Plus, Trash2, X } from 'lucide-react';
 
+import { AppointmentFormDialog } from '../components/AppointmentFormDialog';
 import { ErrorState } from '../components/ErrorState';
-import { NewAppointmentDialog } from '../components/NewAppointmentDialog';
+import { MiniCalendar } from '../components/MiniCalendar';
 import { StatusPill } from '../components/StatusPill';
 import { agendamentosService } from '../services/agendamentos';
 import { mensagemDoErro } from '../services/api';
 import { clientesService } from '../services/clientes';
 import type { Agendamento, AgendamentoStatus, Cliente } from '../types/api';
-import { formatDiaLabel, formatHora, getLocalHour, toLocalDateInput } from '../utils/date';
+import { formatDiaLabel, formatHora, getLocalHour, isSameLocalDay, toLocalDateInput } from '../utils/date';
 
 /** Janela padrão da timeline quando não há agendamento fora dela. */
-const HORA_INICIO_PADRAO = 8;
-const HORA_FIM_PADRAO = 19;
+const HORA_INICIO_PADRAO = 6;
+const HORA_FIM_PADRAO = 22;
 
 const BORDA_POR_STATUS: Record<AgendamentoStatus, string> = {
   AGENDADO: 'border-l-accent-500',
@@ -33,6 +34,14 @@ interface AgendaDoDia {
 
 function ordenarPorHora(lista: Agendamento[]): Agendamento[] {
   return [...lista].sort((a, b) => a.dataHora.localeCompare(b.dataHora));
+}
+
+function inicioDoMes(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), 1);
+}
+
+function mesmoMes(a: Date, b: Date): boolean {
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth();
 }
 
 const SEM_AGENDAMENTOS: Agendamento[] = [];
@@ -57,9 +66,26 @@ export function AgendaPage() {
   const [erroAcao, setErroAcao] = useState<string | null>(null);
   const [dialogAberto, setDialogAberto] = useState(false);
   const [horaParaAgendar, setHoraParaAgendar] = useState<string | undefined>(undefined);
+  const [agendamentoEditando, setAgendamentoEditando] = useState<Agendamento | null>(null);
+  const [todosAgendamentos, setTodosAgendamentos] = useState<Agendamento[]>([]);
+  const [mesVisivel, setMesVisivel] = useState(() => inicioDoMes(dia));
+  const [mesSincronizadoCom, setMesSincronizadoCom] = useState(dia);
+  const [calendarioAberto, setCalendarioAberto] = useState(false);
+
+  // Ajusta o mês visível quando o dia muda de mês por fora do mini calendário
+  // (setas de dia, "Hoje"). Padrão oficial do React pra "resetar" estado
+  // derivado de uma prop durante o render, sem precisar de useEffect.
+  if (!mesmoMes(mesSincronizadoCom, dia)) {
+    setMesSincronizadoCom(dia);
+    setMesVisivel(inicioDoMes(dia));
+  }
 
   useEffect(() => {
     clientesService.listar().then(setClientes).catch(() => setClientes([]));
+  }, [tentativa]);
+
+  useEffect(() => {
+    agendamentosService.listar().then(setTodosAgendamentos).catch(() => setTodosAgendamentos([]));
   }, [tentativa]);
 
   useEffect(() => {
@@ -120,6 +146,19 @@ export function AgendaPage() {
     };
   }, [agendamentos, horaInicio, horaFim]);
 
+  const diasComAgendamento = useMemo(() => {
+    const set = new Set<string>();
+    for (const a of todosAgendamentos) {
+      if (a.status === 'CANCELADO') continue;
+      set.add(toLocalDateInput(new Date(a.dataHora)));
+    }
+    return set;
+  }, [todosAgendamentos]);
+
+  function mudarMes(delta: number) {
+    setMesVisivel((atual) => new Date(atual.getFullYear(), atual.getMonth() + delta, 1));
+  }
+
   function nomeCliente(clienteId: string) {
     return clientes.find((c) => c.id === clienteId)?.nome ?? '—';
   }
@@ -152,9 +191,31 @@ export function AgendaPage() {
     }
   }
 
+  async function removerAgendamento(id: string) {
+    if (!window.confirm('Excluir este agendamento? Isso não pode ser desfeito.')) return;
+    setErroAcao(null);
+    try {
+      await agendamentosService.remover(id);
+      removerDaLista(id);
+    } catch (err) {
+      setErroAcao(mensagemDoErro(err, 'Não foi possível excluir o agendamento.'));
+    }
+  }
+
   function abrirNovoAgendamento(hora?: string) {
+    setAgendamentoEditando(null);
     setHoraParaAgendar(hora);
     setDialogAberto(true);
+  }
+
+  function abrirEdicao(agendamento: Agendamento) {
+    setAgendamentoEditando(agendamento);
+    setDialogAberto(true);
+  }
+
+  function removerDaLista(id: string) {
+    substituirLista((lista) => lista.filter((a) => a.id !== id));
+    setDialogAberto(false);
   }
 
   const isHoje = toLocalDateInput(dia) === toLocalDateInput(new Date());
@@ -174,96 +235,174 @@ export function AgendaPage() {
             Hoje
           </button>
         )}
+        <button
+          type="button"
+          className="btn btn-icon btn-secondary lg:hidden"
+          onClick={() => setCalendarioAberto(true)}
+          aria-label="Abrir calendário"
+        >
+          <CalendarDays size={16} />
+        </button>
         <button className="btn btn-primary ml-auto" onClick={() => abrirNovoAgendamento()}>
           <Plus size={16} /> Agendamento
         </button>
       </div>
 
-      {!carregando && !erroCarga && (
-        <div className="flex gap-4 flex-wrap text-xs text-content-muted">
-          <span>{resumo.agendados} agendado{resumo.agendados !== 1 ? 's' : ''}</span>
-          <span>{resumo.concluidos} concluído{resumo.concluidos !== 1 ? 's' : ''}</span>
-          <span>{resumo.cancelados} cancelado{resumo.cancelados !== 1 ? 's' : ''}</span>
-          <span className="text-accent-2-700 dark:text-accent-2-300 font-semibold">
-            {formatLivre(resumo.livreMin)}
-          </span>
-        </div>
-      )}
-
-      {carregando && <p className="text-content-muted text-sm">Carregando…</p>}
-
-      {erroCarga && (
-        <div className="flex-1 flex items-center justify-center">
-          <ErrorState mensagem={erroCarga} onTentarDeNovo={recarregar} />
-        </div>
-      )}
-
-      {erroAcao && (
-        <p role="alert" className="text-sm text-accent-700 dark:text-accent-300">
-          {erroAcao}
-        </p>
-      )}
-
-      {!carregando && !erroCarga && (
-        <div className="flex flex-col max-w-3xl w-full">
-          {horas.map((h) => (
-            <div key={h} className="grid grid-cols-[52px_1fr] gap-3 border-t border-line first:border-t-0 py-2">
-              <div className="text-xs text-content-muted pt-3">{formatHoraCheia(h)}</div>
-              <div className="flex flex-col gap-2 min-h-11 justify-center">
-                {(porHora.get(h) ?? []).length > 0 ? (
-                  (porHora.get(h) ?? []).map((a) => (
-                    <div
-                      key={a.id}
-                      className={`card flex-row items-center gap-4 border-l-4 ${BORDA_POR_STATUS[a.status]}`}
-                    >
-                      <div className="w-14 flex-none">
-                        <div className="font-semibold text-sm">{formatHora(a.dataHora)}</div>
-                        <div className="text-[11px] text-content-muted">{a.duracaoMinutos} min</div>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-semibold text-sm truncate">{nomeCliente(a.clienteId)}</div>
-                        {a.observacoes && (
-                          <div className="text-xs text-content-muted truncate">{a.observacoes}</div>
-                        )}
-                      </div>
-                      <StatusPill status={a.status} />
-                      {a.status === 'AGENDADO' && (
-                        <div className="flex gap-1 flex-none">
-                          <button className="btn btn-ghost text-xs" onClick={() => marcar(a.id, 'concluir')}>
-                            Concluir
-                          </button>
-                          <button className="btn btn-ghost text-xs" onClick={() => marcar(a.id, 'cancelar')}>
-                            Cancelar
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  ))
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => abrirNovoAgendamento(formatHoraCheia(h))}
-                    className="flex items-center justify-center rounded-2xl border border-dashed border-line text-content-muted text-xs py-3 cursor-pointer transition-colors hover:border-accent hover:text-accent"
-                  >
-                    livre · toque pra agendar
-                  </button>
-                )}
-              </div>
+      <div className="flex flex-col lg:flex-row gap-8 items-start flex-1">
+        <div className="flex flex-col gap-5 w-full min-w-0 lg:flex-none lg:max-w-3xl">
+          {!carregando && !erroCarga && (
+            <div className="flex gap-4 flex-wrap text-xs text-content-muted">
+              <span>{resumo.agendados} agendado{resumo.agendados !== 1 ? 's' : ''}</span>
+              <span>{resumo.concluidos} concluído{resumo.concluidos !== 1 ? 's' : ''}</span>
+              <span>{resumo.cancelados} cancelado{resumo.cancelados !== 1 ? 's' : ''}</span>
+              <span className="text-accent-2-700 dark:text-accent-2-300 font-semibold">
+                {formatLivre(resumo.livreMin)}
+              </span>
             </div>
-          ))}
+          )}
+
+          {carregando && <p className="text-content-muted text-sm">Carregando…</p>}
+
+          {erroCarga && (
+            <div className="flex-1 flex items-center justify-center">
+              <ErrorState mensagem={erroCarga} onTentarDeNovo={recarregar} />
+            </div>
+          )}
+
+          {erroAcao && (
+            <p role="alert" className="text-sm text-accent-700 dark:text-accent-300">
+              {erroAcao}
+            </p>
+          )}
+
+          {!carregando && !erroCarga && (
+            <div className="flex flex-col max-w-3xl w-full">
+              {horas.map((h) => (
+                <div key={h} className="grid grid-cols-[52px_1fr] gap-3 border-t border-line first:border-t-0 py-2">
+                  <div className="text-xs text-content-muted pt-3">{formatHoraCheia(h)}</div>
+                  <div className="flex flex-col gap-2 min-h-11 justify-center">
+                    {(porHora.get(h) ?? []).length > 0 ? (
+                      (porHora.get(h) ?? []).map((a) => (
+                        <div
+                          key={a.id}
+                          className={`card flex-row items-center gap-4 border-l-4 ${BORDA_POR_STATUS[a.status]}`}
+                        >
+                          <div className="w-14 flex-none">
+                            <div className="font-semibold text-sm">{formatHora(a.dataHora)}</div>
+                            <div className="text-[11px] text-content-muted">{a.duracaoMinutos} min</div>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-semibold text-sm truncate">{nomeCliente(a.clienteId)}</div>
+                            {a.observacoes && (
+                              <div className="text-xs text-content-muted truncate">{a.observacoes}</div>
+                            )}
+                          </div>
+                          <StatusPill status={a.status} />
+                          <div className="flex gap-1 flex-none">
+                            {a.status === 'AGENDADO' && (
+                              <>
+                                <button className="btn btn-ghost text-xs" onClick={() => marcar(a.id, 'concluir')}>
+                                  Concluir
+                                </button>
+                                <button className="btn btn-ghost text-xs" onClick={() => marcar(a.id, 'cancelar')}>
+                                  Cancelar
+                                </button>
+                              </>
+                            )}
+                            <button
+                              type="button"
+                              className="btn btn-icon btn-ghost"
+                              onClick={() => abrirEdicao(a)}
+                              aria-label="Editar agendamento"
+                            >
+                              <Pencil size={14} />
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-icon btn-ghost"
+                              onClick={() => removerAgendamento(a.id)}
+                              aria-label="Excluir agendamento"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => abrirNovoAgendamento(formatHoraCheia(h))}
+                        className="flex items-center justify-center rounded-2xl border border-dashed border-line text-content-muted text-xs py-3 cursor-pointer transition-colors hover:border-accent hover:text-accent"
+                      >
+                        livre · toque pra agendar
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <aside className="hidden lg:block flex-1 max-w-2xl sticky top-4">
+          <MiniCalendar
+            mesVisivel={mesVisivel}
+            diaSelecionado={dia}
+            diasComAgendamento={diasComAgendamento}
+            onSelecionarDia={setDia}
+            onMudarMes={mudarMes}
+          />
+        </aside>
+      </div>
+
+      {calendarioAberto && (
+        <div className="dialog-backdrop" onClick={() => setCalendarioAberto(false)}>
+          <div className="dialog" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center">
+              <h2 className="dialog-title">Calendário</h2>
+              <button
+                type="button"
+                onClick={() => setCalendarioAberto(false)}
+                aria-label="Fechar"
+                className="ml-auto btn btn-icon btn-ghost"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <MiniCalendar
+              mesVisivel={mesVisivel}
+              diaSelecionado={dia}
+              diasComAgendamento={diasComAgendamento}
+              onSelecionarDia={(d) => {
+                setDia(d);
+                setCalendarioAberto(false);
+              }}
+              onMudarMes={mudarMes}
+            />
+          </div>
         </div>
       )}
 
       {dialogAberto && (
-        <NewAppointmentDialog
+        <AppointmentFormDialog
           clientes={clientes}
+          agendamento={agendamentoEditando ?? undefined}
           initialDate={dia}
           initialHora={horaParaAgendar}
           onClose={() => setDialogAberto(false)}
-          onCreated={(criado) => {
-            substituirLista((lista) => ordenarPorHora([...lista, criado]));
+          onSaved={(salvo) => {
+            substituirLista((lista) => {
+              const mesmoDia = isSameLocalDay(salvo.dataHora, dia);
+              if (agendamentoEditando) {
+                return mesmoDia
+                  ? ordenarPorHora(lista.map((a) => (a.id === salvo.id ? salvo : a)))
+                  : lista.filter((a) => a.id !== salvo.id);
+              }
+              return mesmoDia ? ordenarPorHora([...lista, salvo]) : lista;
+            });
             setDialogAberto(false);
           }}
+          onDeleted={removerDaLista}
         />
       )}
     </div>
