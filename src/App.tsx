@@ -13,6 +13,7 @@ import { LoginPage } from './pages/LoginPage';
 import { NotFound } from './pages/NotFound';
 import { RegisterPage } from './pages/RegisterPage';
 import { ResetPasswordPage } from './pages/ResetPasswordPage';
+import { SettingsPage } from './pages/SettingsPage';
 
 export default function App() {
   return (
@@ -31,6 +32,7 @@ export default function App() {
                 <Route path="/agenda" element={<AgendaPage />} />
                 <Route path="/clientes" element={<ClientsPage />} />
                 <Route path="/clientes/:id" element={<ClientDetailPage />} />
+                <Route path="/configuracoes" element={<SettingsPage />} />
               </Route>
             </Route>
 

@@ -298,6 +298,12 @@ export function AgendaPage() {
                             )}
                           </div>
                           <StatusPill status={a.status} />
+                          {a.status === 'AGENDADO' && a.confirmado && (
+                            <span className="tag tag-accent-2">Confirmado</span>
+                          )}
+                          {a.status === 'AGENDADO' && !a.confirmado && a.lembreteEnviadoEm && (
+                            <span className="tag tag-outline">Lembrete enviado</span>
+                          )}
                           <div className="flex gap-1 flex-none">
                             {a.status === 'AGENDADO' && (
                               <>

@@ -133,6 +133,7 @@ export function ClientDetailPage() {
             </span>
             <span className="flex-1 truncate">{a.observacoes || `${a.duracaoMinutos} min`}</span>
             <StatusPill status={a.status} />
+            {a.status === 'AGENDADO' && a.confirmado && <span className="tag tag-accent-2">Confirmado</span>}
           </div>
         ))}
       </div>

@@ -1,4 +1,4 @@
-import { CalendarDays, LogOut, Users } from 'lucide-react';
+import { CalendarDays, LogOut, Settings, Users } from 'lucide-react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 
 import { useAuth } from '../contexts/auth-context';
@@ -7,6 +7,7 @@ import { ThemeToggle } from './ThemeToggle';
 const NAV_ITEMS = [
   { to: '/agenda', label: 'Agenda', icon: CalendarDays, end: true },
   { to: '/clientes', label: 'Clientes', icon: Users, end: false },
+  { to: '/configuracoes', label: 'Configurações', icon: Settings, end: false },
 ];
 
 function navItemClass(isActive: boolean) {

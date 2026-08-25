@@ -23,6 +23,8 @@ export interface Agendamento {
   duracaoMinutos: number;
   status: AgendamentoStatus;
   observacoes: string | null;
+  confirmado: boolean;
+  lembreteEnviadoEm: string | null;
 }
 
 export interface AgendamentoInput {
@@ -54,4 +56,19 @@ export interface ApiError {
   status: number;
   message: string;
   fieldErrors: Record<string, string>;
+}
+
+export type WhatsappTemplateStatus = 'PENDENTE' | 'APROVADO' | 'REJEITADO';
+
+export interface WhatsappStatus {
+  conectado: boolean;
+  numeroExibicao: string | null;
+  conectadoEm: string | null;
+  templateStatus: WhatsappTemplateStatus | null;
+}
+
+export interface WhatsappConectarInput {
+  code: string;
+  wabaId: string;
+  phoneNumberId: string;
 }
