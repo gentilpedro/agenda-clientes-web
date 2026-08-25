@@ -143,14 +143,19 @@ export function LandingPage() {
           </Link>
         </div>
 
-        <footer className="flex items-center gap-5 px-6 py-5 md:px-10 text-xs text-content-muted border-t border-line">
+        <footer className="flex flex-wrap items-center gap-x-5 gap-y-2 px-6 py-5 md:px-10 text-xs text-content-muted border-t border-line">
           <div className="flex items-center gap-2">
             <img src="/favicon.png" alt="" className="w-5 h-5 shrink-0" />
             Agenda
           </div>
-          <div className="ml-auto flex gap-4">
-            <span>Privacidade</span>
-            <span>Termos</span>
+          <span>© {new Date().getFullYear()} Agenda Clientes. Todos os direitos reservados.</span>
+          <div className="md:ml-auto flex gap-4">
+            <Link to="/privacidade" className="hover:text-content transition-colors">
+              Privacidade
+            </Link>
+            <Link to="/termos" className="hover:text-content transition-colors">
+              Termos
+            </Link>
             <span>Contato</span>
           </div>
         </footer>

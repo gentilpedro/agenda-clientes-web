@@ -11,8 +11,10 @@ import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/LoginPage';
 import { NotFound } from './pages/NotFound';
+import { PrivacyPage } from './pages/PrivacyPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { ResetPasswordPage } from './pages/ResetPasswordPage';
+import { TermsPage } from './pages/TermsPage';
 
 export default function App() {
   return (
@@ -25,6 +27,8 @@ export default function App() {
             <Route path="/cadastro" element={<RegisterPage />} />
             <Route path="/esqueci-senha" element={<ForgotPasswordPage />} />
             <Route path="/redefinir-senha" element={<ResetPasswordPage />} />
+            <Route path="/termos" element={<TermsPage />} />
+            <Route path="/privacidade" element={<PrivacyPage />} />
 
             <Route element={<ProtectedRoute />}>
               <Route element={<Layout />}>
