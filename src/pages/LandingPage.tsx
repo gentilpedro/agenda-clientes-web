@@ -87,10 +87,12 @@ export function LandingPage() {
               Grátis, sem cartão. Exporte seus dados quando quiser.
             </p>
           </div>
-          <div className="flex-1 w-full max-w-sm">
-            <div className="h-56 md:h-64 rounded-3xl border border-dashed border-accent-2-300 bg-accent-2-100 grid place-items-center text-center text-xs text-[#201e1d]/60 px-4">
-              captura de tela da agenda
-            </div>
+          <div className="flex-1 w-full max-w-xl">
+            <img
+              src="/screenshot-agenda.png"
+              alt="Tela da agenda mostrando os agendamentos do dia, com cliente, horário e status de cada um"
+              className="w-full rounded-3xl border border-line elev-lg"
+            />
           </div>
         </div>
 
