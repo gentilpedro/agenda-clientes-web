@@ -1,0 +1,329 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-15T04:44:19.373Z",
+  "title": "Design System: Agenda",
+  "extensions": {
+    "colorMeta": {
+      "terracota": {
+        "role": "primary",
+        "displayName": "Terracota",
+        "canonical": "#c67139",
+        "tonalRamp": [
+          "#402310",
+          "#643312",
+          "#8c491a",
+          "#b2622d",
+          "#d67f48",
+          "#f6a06b",
+          "#ffc6a5",
+          "#ffe1d0"
+        ]
+      },
+      "terracota-600": {
+        "role": "primary",
+        "displayName": "Terracota 600 (hover)",
+        "canonical": "#b2622d"
+      },
+      "terracota-700": {
+        "role": "primary",
+        "displayName": "Terracota 700 (tinta no claro / erro)",
+        "canonical": "#8c491a"
+      },
+      "terracota-100": {
+        "role": "primary",
+        "displayName": "Terracota 100",
+        "canonical": "#fff2eb"
+      },
+      "terracota-200": {
+        "role": "primary",
+        "displayName": "Terracota 200 (nav ativa)",
+        "canonical": "#ffe1d0"
+      },
+      "terracota-800": {
+        "role": "primary",
+        "displayName": "Terracota 800",
+        "canonical": "#643312"
+      },
+      "salvia": {
+        "role": "secondary",
+        "displayName": "Sálvia",
+        "canonical": "#7a8a5e",
+        "tonalRamp": [
+          "#272e1b",
+          "#3d472b",
+          "#56633f",
+          "#728157",
+          "#8fa073",
+          "#aebf92",
+          "#ccdbb2",
+          "#e1eecc"
+        ]
+      },
+      "salvia-100": {
+        "role": "secondary",
+        "displayName": "Sálvia 100",
+        "canonical": "#f0fae1"
+      },
+      "salvia-200": {
+        "role": "secondary",
+        "displayName": "Sálvia 200",
+        "canonical": "#e1eecc"
+      },
+      "salvia-800": {
+        "role": "secondary",
+        "displayName": "Sálvia 800",
+        "canonical": "#3d472b"
+      },
+      "creme": {
+        "role": "neutral",
+        "displayName": "Creme (fundo claro)",
+        "canonical": "#f5ead8",
+        "tonalRamp": [
+          "#2a241c",
+          "#4a4134",
+          "#6e624f",
+          "#958770",
+          "#bcad93",
+          "#dccdb4",
+          "#ebddc5",
+          "#f5ead8"
+        ]
+      },
+      "areia": {
+        "role": "neutral",
+        "displayName": "Areia (superfície clara)",
+        "canonical": "#ebddc5"
+      },
+      "carvao-quente": {
+        "role": "neutral",
+        "displayName": "Carvão Quente (texto claro)",
+        "canonical": "#201e1d",
+        "tonalRamp": [
+          "#201e1d",
+          "#353230",
+          "#4b4744",
+          "#625d59",
+          "#7b7570",
+          "#958f89",
+          "#b1aba5",
+          "#cdc8c2"
+        ]
+      },
+      "noite-cafe": {
+        "role": "neutral",
+        "displayName": "Noite Café (fundo escuro)",
+        "canonical": "#221d19"
+      },
+      "noite-cafe-raised": {
+        "role": "neutral",
+        "displayName": "Noite Café Elevada (superfície escura)",
+        "canonical": "#2b2521"
+      },
+      "papel-noturno": {
+        "role": "neutral",
+        "displayName": "Papel Noturno (texto escuro)",
+        "canonical": "#f2e7d5"
+      },
+      "terracota-400": {
+        "role": "primary",
+        "displayName": "Terracota 400 (pressionado)",
+        "canonical": "#f6a06b"
+      },
+      "terracota-500": {
+        "role": "primary",
+        "displayName": "Terracota 500 (hover; tinta no escuro)",
+        "canonical": "#d67f48"
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Título da landing. Só ali; responsivo 2.25rem → 3rem."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Título de cada tela do app (data do dia, Clientes); 1.5rem → 1.875rem."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Títulos de card (17px) e diálogo (20px); Caprasimo 14px é a voz dos botões."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Conteúdo e dados; 15px base, 14px em campos e tabelas."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Rótulos de campo (12px/600 a 70%); tags em 11px/600."
+      },
+      "overline": {
+        "displayName": "Overline",
+        "purpose": "Apenas cabeçalhos de tabela, em maiúsculas."
+      }
+    },
+    "shadows": [
+      {
+        "name": "soft",
+        "value": "0 1px 2px rgba(46, 43, 37, 0.14)",
+        "purpose": "Realce mínimo opcional (.elev-sm)."
+      },
+      {
+        "name": "lifted",
+        "value": "0 3px 10px rgba(46, 43, 37, 0.16)",
+        "purpose": "Disponível como .elev-md; sem uso atual."
+      },
+      {
+        "name": "floating",
+        "value": "0 12px 32px rgba(46, 43, 37, 0.22)",
+        "purpose": "Diálogos — a única sombra em uso."
+      }
+    ],
+    "motion": [
+      {
+        "name": "color-fast",
+        "value": "background-color 0.15s ease",
+        "purpose": "Hover/pressionado de botões e itens de navegação."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "md",
+        "value": "768px",
+        "purpose": "Troca barra inferior + cabeçalho mobile por trilho lateral; cards viram tabela."
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Ação principal da tela (Agendamento, Agendar, Entrar).",
+      "html": "<button class=\"ds-btn ds-btn-primary\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 12h14\"/><path d=\"M12 5v14\"/></svg> Agendamento</button>",
+      "css": ".ds-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; border-radius: 999px; font-family: 'Caprasimo', Georgia, serif; font-weight: 400; font-size: 14px; line-height: 1.2; border: 1px solid transparent; padding: 10px 18px; transition: background-color 0.15s ease; } .ds-btn-primary { background: #c67139; color: #201e1d; } .ds-btn-primary:hover { background: #d67f48; } .ds-btn-primary:active { background: #f6a06b; } .ds-btn:focus-visible { outline: 2px solid #8c491a; outline-offset: 2px; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Ações de apoio (Hoje, Entrar no cabeçalho, navegação de dia).",
+      "html": "<button class=\"ds-btn-secondary\">Hoje</button>",
+      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; border-radius: 999px; font-family: 'Caprasimo', Georgia, serif; font-size: 14px; line-height: 1.2; color: #201e1d; background: transparent; border: 1px solid rgba(32, 30, 29, 0.16); padding: 10px 18px; transition: background-color 0.15s ease; } .ds-btn-secondary:hover { background: rgba(32, 30, 29, 0.07); } .ds-btn-secondary:active { background: rgba(32, 30, 29, 0.14); } .ds-btn-secondary:focus-visible { outline: 2px solid #8c491a; outline-offset: 2px; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Ações em linha dentro de cards (Concluir, Cancelar, trocar).",
+      "html": "<button class=\"ds-btn-ghost\">Concluir</button>",
+      "css": ".ds-btn-ghost { display: inline-flex; align-items: center; cursor: pointer; border-radius: 999px; font-family: 'Caprasimo', Georgia, serif; font-size: 12px; line-height: 1.2; color: #8c491a; background: transparent; border: 1px solid transparent; padding: 10px 6px; transition: background-color 0.15s ease; } .ds-btn-ghost:hover { background: rgba(140, 73, 26, 0.10); } .ds-btn-ghost:active { background: rgba(140, 73, 26, 0.18); } .ds-btn-ghost:focus-visible { outline: 2px solid #8c491a; outline-offset: 2px; }"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Campo em pílula com rótulo acima.",
+      "html": "<div class=\"ds-field\"><label class=\"ds-label\">Cliente</label><input class=\"ds-input\" placeholder=\"Digite um nome…\" /></div>",
+      "css": ".ds-field { display: flex; flex-direction: column; width: 280px; font-family: 'Figtree', system-ui, sans-serif; } .ds-label { font-size: 12px; font-weight: 600; margin-bottom: 5px; color: rgba(32, 30, 29, 0.7); } .ds-input { min-height: 40px; padding: 8px 16px; font: inherit; font-size: 14px; color: #201e1d; caret-color: #c67139; background: #ebddc5; border: 1px solid rgba(32, 30, 29, 0.55); border-radius: 999px; outline: none; } .ds-input:hover { border-color: rgba(32, 30, 29, 0.75); } .ds-input:focus-visible { border-color: #8c491a; } .ds-input::placeholder { color: rgba(32, 30, 29, 0.68); }"
+    },
+    {
+      "name": "Status Tags",
+      "kind": "chip",
+      "refersTo": "tag-concluido",
+      "description": "Status do agendamento: Agendado (contorno terracota), Concluído (sálvia), Cancelado (neutro).",
+      "html": "<div class=\"ds-tags\"><span class=\"ds-tag ds-tag-outline\">Agendado</span><span class=\"ds-tag ds-tag-salvia\">Concluído</span><span class=\"ds-tag ds-tag-neutral\">Cancelado</span></div>",
+      "css": ".ds-tags { display: flex; gap: 8px; font-family: 'Figtree', system-ui, sans-serif; } .ds-tag { display: inline-flex; align-items: center; font-size: 11px; font-weight: 600; letter-spacing: 0.02em; padding: 4px 11px; border-radius: 999px; border: 1px solid transparent; } .ds-tag-outline { border-color: #8c491a; color: #8c491a; } .ds-tag-salvia { background: #f0fae1; color: #3d472b; } .ds-tag-neutral { background: rgba(32, 30, 29, 0.10); color: #201e1d; }"
+    },
+    {
+      "name": "Agenda Slot",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Card de horário da agenda: horário/duração, cliente/observação, status, ações.",
+      "html": "<div class=\"ds-slot\"><div class=\"ds-slot-time\"><div class=\"ds-slot-hour\">09:00</div><div class=\"ds-slot-dur\">50 min</div></div><div class=\"ds-slot-main\"><div class=\"ds-slot-name\">Mariana Costa</div><div class=\"ds-slot-note\">Retorno — revisar exames</div></div><span class=\"ds-slot-tag\">Agendado</span><button class=\"ds-slot-action\">Concluir</button></div>",
+      "css": ".ds-slot { display: flex; align-items: center; gap: 16px; width: 520px; padding: 14px; border-radius: 32px; background: #ebddc5; border: 1px solid rgba(32, 30, 29, 0.16); font-family: 'Figtree', system-ui, sans-serif; color: #201e1d; } .ds-slot-time { width: 56px; flex: none; } .ds-slot-hour { font-weight: 600; font-size: 14px; } .ds-slot-dur { font-size: 11px; color: rgba(32, 30, 29, 0.68); } .ds-slot-main { flex: 1; min-width: 0; } .ds-slot-name { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .ds-slot-note { font-size: 12px; color: rgba(32, 30, 29, 0.68); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .ds-slot-tag { font-size: 11px; font-weight: 600; letter-spacing: 0.02em; padding: 4px 11px; border-radius: 999px; border: 1px solid #8c491a; color: #8c491a; } .ds-slot-action { cursor: pointer; border: none; background: transparent; border-radius: 999px; font-family: 'Caprasimo', Georgia, serif; font-size: 12px; color: #8c491a; padding: 10px 6px; transition: background-color 0.15s ease; } .ds-slot-action:hover { background: rgba(140, 73, 26, 0.10); } .ds-slot-action:focus-visible { outline: 2px solid #8c491a; outline-offset: 2px; }"
+    },
+    {
+      "name": "Segmented Duration",
+      "kind": "custom",
+      "refersTo": "segmented",
+      "description": "Escolha de duração 30m / 50m / 60m.",
+      "html": "<div class=\"ds-seg\"><button class=\"ds-seg-opt\">30m</button><button class=\"ds-seg-opt ds-seg-on\">50m</button><button class=\"ds-seg-opt\">60m</button></div>",
+      "css": ".ds-seg { display: inline-flex; overflow: hidden; border: 1px solid rgba(32, 30, 29, 0.16); border-radius: 999px; font-family: 'Figtree', system-ui, sans-serif; } .ds-seg-opt { padding: 8px 14px; font-size: 13px; cursor: pointer; border: none; background: transparent; color: #201e1d; } .ds-seg-opt + .ds-seg-opt { border-left: 1px solid rgba(32, 30, 29, 0.16); } .ds-seg-on { background: #201e1d; color: #f5ead8; } .ds-seg-opt:not(.ds-seg-on):hover { background: rgba(32, 30, 29, 0.07); } .ds-seg-opt:focus-visible { outline: 2px solid #8c491a; outline-offset: -2px; }"
+    },
+    {
+      "name": "Side Rail Navigation",
+      "kind": "nav",
+      "refersTo": "nav-item-active",
+      "description": "Trilho lateral de 72px no desktop, com itens só de ícone.",
+      "html": "<nav class=\"ds-rail\"><span class=\"ds-rail-mark\"></span><a class=\"ds-rail-item ds-rail-on\" title=\"Agenda\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"3\" y=\"4\" width=\"18\" height=\"18\" rx=\"2\"/><path d=\"M16 2v4M8 2v4M3 10h18\"/></svg></a><a class=\"ds-rail-item\" title=\"Clientes\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\"/><circle cx=\"9\" cy=\"7\" r=\"4\"/><path d=\"M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75\"/></svg></a></nav>",
+      "css": ".ds-rail { display: flex; flex-direction: column; align-items: center; gap: 16px; width: 72px; padding: 20px 0; background: rgba(255, 242, 235, 0.4); border-right: 1px solid rgba(32, 30, 29, 0.16); } .ds-rail-mark { width: 28px; height: 28px; border-radius: 999px; background: #c67139; } .ds-rail-item { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 16px; color: rgba(32, 30, 29, 0.68); cursor: pointer; transition: background-color 0.15s ease; } .ds-rail-item:hover { background: #fff2eb; } .ds-rail-on { background: #ffe1d0; color: #643312; } .ds-rail-item:focus-visible { outline: 2px solid #8c491a; outline-offset: 2px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "A Sala de Espera Acolhedora",
+    "overview": "O sistema é a recepção de um consultório bem cuidado, e não um hospital nem um software corporativo. O fundo é creme como papel de boa gramatura, o acento terracota lembra barro cozido e o sálvia funciona como uma planta no canto da sala. Quem chega, seja a profissional entre dois atendimentos ou a recepção no meio do expediente, deve sentir calma antes de qualquer outra coisa. Pacientes e clientes estão por trás de cada linha, e o calor do sistema é uma forma de discrição: nada grita, nada alarma.\n\nA densidade é moderada. A agenda do dia é uma pilha vertical de cards suaves, um por horário, e a tela respira sem desperdiçar espaço. Os componentes são macios e acolhedores: botões em pílula, cards de cantos generosos, campos arredondados que convidam ao toque, inclusive com o polegar no celular. A tipografia alterna a voz calorosa e encorpada da Caprasimo, nos títulos e nos botões, com a neutralidade limpa da Figtree em tudo que precisa ser lido rápido.\n\nA profundidade é plana, feita de camadas tonais. Superfícies se distinguem pelo tom (creme → areia) e por uma borda fina e translúcida, e a sombra fica reservada para o que realmente flutua, como os diálogos. O tema escuro é a mesma sala à noite: café escuro em vez de creme, com os mesmos acentos.",
+    "keyCharacteristics": [
+      "Fundo creme quente e superfícies areia; nunca branco puro nem cinza frio.",
+      "Um acento principal (terracota) para ação e um secundário (sálvia) para conclusão.",
+      "Formas em pílula e cantos muito arredondados em todos os componentes interativos.",
+      "Caprasimo nos títulos e botões, Figtree no corpo e nos dados.",
+      "Plano por padrão: profundidade por tom e borda, sombra só no que flutua.",
+      "Tema claro e escuro trocam apenas fundo, superfície e texto; os acentos são os mesmos."
+    ],
+    "rules": [
+      {
+        "name": "The Same Room Rule",
+        "body": "Claro e escuro são a mesma sala em horários diferentes. Só surface, surface-raised, content, content-muted, heading, line, line-strong e accent-ink trocam de valor; as rampas de terracota e sálvia não mudam. Use sempre os tokens semânticos (bg-surface, text-content…), e dark: só para ajustes pontuais nas rampas de acento.",
+        "section": "colors"
+      },
+      {
+        "name": "The Ink Rule",
+        "body": "O terracota puro (accent) só aparece como fundo ou como mancha (marca, caret, seleção). Quando o terracota precisa ser lido como texto, ícone pequeno ou contorno de foco, use accent-ink. Texto sobre fundo terracota é sempre on-accent (carvão), em qualquer tema.",
+        "section": "colors"
+      },
+      {
+        "name": "The Two Accents Rule",
+        "body": "Terracota é ação, sálvia é concluído. Não introduza um terceiro matiz (azul, roxo, vermelho de erro) sem decisão explícita; estados neutros como \"Cancelado\" usam o próprio texto a 10% de opacidade.",
+        "section": "colors"
+      },
+      {
+        "name": "The No Cold Gray Rule",
+        "body": "Todo neutro deriva do carvão quente ou do papel noturno por opacidade ou color-mix. Cinzas frios do Tailwind (gray-*, slate-*) não pertencem a esta sala.",
+        "section": "colors"
+      },
+      {
+        "name": "The Warm Voice Rule",
+        "body": "A Caprasimo fala apenas em títulos, títulos de card/diálogo e botões, sempre no peso 400. Nunca em corpo de texto, dados, rótulos ou tags, e nunca em negrito sintético.",
+        "section": "typography"
+      },
+      {
+        "name": "The Data Is Figtree Rule",
+        "body": "Horários, durações, nomes, telefones e e-mails são sempre Figtree, porque o que precisa ser lido rápido usa a fonte neutra.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Room Rule",
+        "body": "Superfícies em repouso não têm sombra. Para separar algo, use tom (surface → surface-raised) e borda line. Sombra é reservada para camadas que flutuam sobre a página (diálogos e, no futuro, menus e popovers).",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do usar sempre os tokens semânticos (surface, surface-raised, content, content-muted, heading, line) para que claro e escuro funcionem sem dark: espalhado.",
+      "Do usar as classes do sistema (btn, input, card, tag, seg, dialog, ds-table) em vez de recriar o mesmo visual com utilitários soltos.",
+      "Do manter todo controle interativo em pílula (999px) e toda superfície de conteúdo com cantos generosos (16px ou mais).",
+      "Do reservar terracota para ação e foco, e sálvia para conclusão.",
+      "Do usar accent-ink sempre que o terracota for texto, ícone pequeno ou contorno, e on-accent (carvão) para texto sobre fundo terracota.",
+      "Do trocar tabela por pilha de cards abaixo de 768px.",
+      "Do separar camadas com tom e borda line, e não com sombra."
+    ],
+    "donts": [
+      "Don't pôr texto creme sobre o terracota nem usar text-accent em texto pequeno; os dois ficam em 3:1.",
+      "Don't usar branco puro (#fff), preto puro ou cinzas frios do Tailwind (gray-*, slate-*, zinc-*).",
+      "Don't usar Caprasimo em corpo de texto, dados, rótulos ou tags, nem em pesos acima de 400.",
+      "Don't pôr sombra em cards ou campos em repouso.",
+      "Don't usar cantos retos ou raios pequenos (menos de 8px) em superfícies e controles.",
+      "Don't introduzir um vermelho de alarme para erros ou cancelamentos; erro é terracota escuro, cancelado é neutro.",
+      "Don't nomear uma classe de componente table, container ou outro nome que colida com utilitários nativos do Tailwind; use o prefixo ds-."
+    ]
+  }
+}

@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { X } from 'lucide-react';
 import { PhoneInput } from 'react-international-phone';
 import 'react-international-phone/style.css';
 
 import { clientesService } from '../services/clientes';
-import { ApiRequestError } from '../services/api';
+import { ApiRequestError, mensagemDoErro } from '../services/api';
 import type { Cliente } from '../types/api';
+import { Dialog } from './Dialog';
+import { Field } from './Field';
 
 /** Telefones antigos foram salvos sem "+" (formato local BR). Prefixa com +55
  * pra a lib reconhecer o país; números já internacionais passam direto. */
@@ -33,14 +34,15 @@ export function ClientFormDialog({ cliente, onClose, onSaved }: ClientFormDialog
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
+    if (salvando) return;
     setSalvando(true);
     setErros({});
     setErroGeral(null);
     const input = {
-      nome,
-      email: email || undefined,
+      nome: nome.trim(),
+      email: email.trim() || undefined,
       telefone,
-      observacoes: observacoes || undefined,
+      observacoes: observacoes.trim() || undefined,
     };
     try {
       const salvo = cliente
@@ -48,81 +50,84 @@ export function ClientFormDialog({ cliente, onClose, onSaved }: ClientFormDialog
         : await clientesService.criar(input);
       onSaved(salvo);
     } catch (err) {
-      if (err instanceof ApiRequestError) {
-        setErros(err.fieldErrors);
-        setErroGeral(Object.keys(err.fieldErrors).length === 0 ? err.message : null);
-      } else {
-        setErroGeral('Não foi possível salvar o cliente');
-      }
+      const fieldErrors = err instanceof ApiRequestError ? err.fieldErrors : {};
+      setErros(fieldErrors);
+      setErroGeral(
+        Object.keys(fieldErrors).length > 0
+          ? 'Revise os campos destacados.'
+          : mensagemDoErro(err, 'Não foi possível salvar o cliente. Seus dados continuam aqui; tente de novo.'),
+      );
     } finally {
       setSalvando(false);
     }
   }
 
   return (
-    <div className="dialog-backdrop" onClick={onClose}>
-      <div className="dialog" onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-center">
-          <h2 className="dialog-title">{isEdit ? 'Editar cliente' : 'Novo cliente'}</h2>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Fechar"
-            className="ml-auto btn btn-icon btn-ghost"
-          >
-            <X size={18} />
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="field">
-            <label>Nome completo</label>
-            <input className="input" value={nome} onChange={(e) => setNome(e.target.value)} required />
-            {erros.nome && <p className="text-xs text-accent-700 dark:text-accent-300 mt-1">{erros.nome}</p>}
-          </div>
-
-          <div className="field">
-            <label>Email</label>
+    <Dialog titulo={isEdit ? 'Editar cliente' : 'Novo cliente'} onClose={onClose}>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <Field label="Nome completo" error={erros.nome}>
+          {(control) => (
             <input
+              {...control}
+              className="input"
+              value={nome}
+              onChange={(e) => setNome(e.target.value)}
+              autoComplete="off"
+              required
+              autoFocus
+            />
+          )}
+        </Field>
+
+        <Field label="Email (opcional)" error={erros.email}>
+          {(control) => (
+            <input
+              {...control}
               type="email"
               className="input"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="nome@exemplo.com"
+              autoComplete="off"
             />
-            {erros.email && <p className="text-xs text-accent-700 dark:text-accent-300 mt-1">{erros.email}</p>}
-          </div>
+          )}
+        </Field>
 
-          <div className="field">
-            <label>Telefone</label>
+        <Field label="Telefone" error={erros.telefone}>
+          {(control) => (
             <PhoneInput
               className="phone-input"
               inputClassName="input"
               defaultCountry="br"
               value={telefone}
               onChange={setTelefone}
-              inputProps={{ required: true, name: 'telefone' }}
+              inputProps={{ ...control, required: true, name: 'telefone', autoComplete: 'off' }}
             />
-            {erros.telefone && <p className="text-xs text-accent-700 dark:text-accent-300 mt-1">{erros.telefone}</p>}
-          </div>
+          )}
+        </Field>
 
-          <div className="field">
-            <label>Notas</label>
+        <Field label="Notas (opcional)" error={erros.observacoes}>
+          {(control) => (
             <textarea
+              {...control}
               className="input"
               rows={4}
               value={observacoes}
               onChange={(e) => setObservacoes(e.target.value)}
             />
-          </div>
+          )}
+        </Field>
 
-          {erroGeral && <p className="text-sm text-accent-700 dark:text-accent-300">{erroGeral}</p>}
+        {erroGeral && (
+          <p role="alert" className="form-error">
+            {erroGeral}
+          </p>
+        )}
 
-          <button type="submit" className="btn btn-primary btn-block" disabled={salvando}>
-            {salvando ? 'Salvando…' : 'Salvar cliente'}
-          </button>
-        </form>
-      </div>
-    </div>
+        <button type="submit" className="btn btn-primary btn-block" disabled={salvando}>
+          {salvando ? 'Salvando…' : 'Salvar cliente'}
+        </button>
+      </form>
+    </Dialog>
   );
 }

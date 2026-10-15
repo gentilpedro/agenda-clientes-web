@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Plus, Search } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
+import { Avatar } from '../components/Avatar';
 import { ClientFormDialog } from '../components/ClientFormDialog';
 import { ErrorState } from '../components/ErrorState';
+import { Carregando, EstadoVazio } from '../components/Feedback';
 import { agendamentosService } from '../services/agendamentos';
 import { mensagemDoErro } from '../services/api';
 import { clientesService } from '../services/clientes';
@@ -100,9 +102,12 @@ export function ClientsPage() {
 
       <div className="field max-w-md">
         <div className="relative">
-          <Search size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-content-muted" />
+          <Search size={15} aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-content-muted" />
           <input
+            type="search"
             className="input pl-10"
+            aria-label="Buscar clientes"
+            autoComplete="off"
             placeholder="Buscar nome, email ou telefone"
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
@@ -110,7 +115,7 @@ export function ClientsPage() {
         </div>
       </div>
 
-      {carregando && <p className="text-content-muted text-sm">Carregando…</p>}
+      {carregando && <Carregando texto="Carregando clientes…" />}
 
       {erro && (
         <div className="flex-1 flex items-center justify-center">
@@ -119,31 +124,32 @@ export function ClientsPage() {
       )}
 
       {!carregando && !erro && filtrados.length === 0 && (
-        <div className="flex-1 flex items-center justify-center">
-          <div className="card items-center text-center py-10 gap-2 border-dashed max-w-md w-full">
-            <p className="font-semibold">{clientes.length === 0 ? 'Nenhum cliente ainda' : 'Nada encontrado'}</p>
-            {clientes.length === 0 && (
-              <>
-                <p className="text-sm text-content-muted">Cadastre o primeiro cliente pra começar.</p>
-                <button className="btn btn-primary mt-2" onClick={() => setDialogAberto(true)}>
-                  <Plus size={16} /> Novo cliente
-                </button>
-              </>
-            )}
-          </div>
-        </div>
+        <EstadoVazio titulo={clientes.length === 0 ? 'Nenhum cliente ainda' : 'Nada encontrado'}>
+          {clientes.length === 0 ? (
+            <>
+              <p className="text-sm text-content-muted">Cadastre o primeiro cliente pra começar.</p>
+              <button className="btn btn-primary mt-2" onClick={() => setDialogAberto(true)}>
+                <Plus size={16} /> Novo cliente
+              </button>
+            </>
+          ) : (
+            <p className="text-sm text-content-muted [overflow-wrap:anywhere]">
+              Nenhum cliente corresponde a “{busca.trim()}”.
+            </p>
+          )}
+        </EstadoVazio>
       )}
 
       {filtrados.length > 0 && (
         <>
-          <table className="ds-table hidden md:table">
+          <table className="ds-table hidden md:table max-w-5xl">
             <thead>
               <tr>
-                <th>Nome</th>
-                <th>Email</th>
-                <th>Telefone</th>
-                <th>Próxima sessão</th>
-                <th></th>
+                <th scope="col">Nome</th>
+                <th scope="col">Email</th>
+                <th scope="col">Telefone</th>
+                <th scope="col">Próxima sessão</th>
+                <th aria-hidden="true"></th>
               </tr>
             </thead>
             <tbody>
@@ -151,34 +157,34 @@ export function ClientsPage() {
                 <tr key={c.id} onClick={() => navigate(`/clientes/${c.id}`)}>
                   <td>
                     <div className="flex items-center gap-3 min-w-0">
-                      <span className="w-6 h-6 rounded-full bg-accent-2-200 dark:bg-accent-2-800 flex-none" />
-                      <span className="font-semibold truncate">{c.nome}</span>
+                      <Avatar nome={c.nome} tamanho="sm" />
+                      <Link to={`/clientes/${c.id}`} className="font-semibold truncate hover:text-accent-ink">
+                        {c.nome}
+                      </Link>
                     </div>
                   </td>
-                  <td className="text-content-muted">{c.email || '—'}</td>
-                  <td className="text-content-muted">{c.telefone}</td>
-                  <td className="text-content-muted">{formatProximaSessao(c.id)}</td>
-                  <td className="text-content-muted">›</td>
+                  <td className="text-content-muted [overflow-wrap:anywhere]">{c.email || '—'}</td>
+                  <td className="text-content-muted whitespace-nowrap tabular-nums">{c.telefone}</td>
+                  <td className="text-content-muted whitespace-nowrap tabular-nums">{formatProximaSessao(c.id)}</td>
+                  <td className="text-content-muted" aria-hidden="true">›</td>
                 </tr>
               ))}
             </tbody>
           </table>
 
-          <div className="flex flex-col gap-2 md:hidden">
+          <ul className="flex flex-col gap-2 md:hidden">
             {filtrados.map((c) => (
-              <button
-                key={c.id}
-                onClick={() => navigate(`/clientes/${c.id}`)}
-                className="card flex-row items-center gap-3 text-left"
-              >
-                <span className="w-9 h-9 rounded-full bg-accent-2-200 dark:bg-accent-2-800 flex-none" />
-                <span className="flex-1 min-w-0">
-                  <span className="block font-semibold text-sm truncate">{c.nome}</span>
-                  <span className="block text-xs text-content-muted truncate">{c.telefone}</span>
-                </span>
-              </button>
+              <li key={c.id}>
+                <Link to={`/clientes/${c.id}`} className="card flex-row items-center gap-3 text-left">
+                  <Avatar nome={c.nome} />
+                  <span className="flex-1 min-w-0">
+                    <span className="block font-semibold text-sm truncate">{c.nome}</span>
+                    <span className="block text-xs text-content-muted truncate tabular-nums">{c.telefone}</span>
+                  </span>
+                </Link>
+              </li>
             ))}
-          </div>
+          </ul>
         </>
       )}
 

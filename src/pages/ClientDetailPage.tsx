@@ -3,8 +3,10 @@ import { ArrowLeft } from 'lucide-react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import { AppointmentFormDialog } from '../components/AppointmentFormDialog';
+import { Avatar } from '../components/Avatar';
 import { ClientFormDialog } from '../components/ClientFormDialog';
 import { ErrorState } from '../components/ErrorState';
+import { Carregando } from '../components/Feedback';
 import { StatusPill } from '../components/StatusPill';
 import { agendamentosService } from '../services/agendamentos';
 import { mensagemDoErro } from '../services/api';
@@ -29,6 +31,7 @@ export function ClientDetailPage() {
   const [tentativa, setTentativa] = useState(0);
   const [resultado, setResultado] = useState<ClienteCarregado | null>(null);
   const [erroAcao, setErroAcao] = useState<string | null>(null);
+  const [removendo, setRemovendo] = useState(false);
   const [dialogAberto, setDialogAberto] = useState(false);
   const [editDialogAberto, setEditDialogAberto] = useState(false);
 
@@ -36,7 +39,7 @@ export function ClientDetailPage() {
     if (!id) return;
     let ignore = false;
     const chave = tentativa;
-    Promise.all([clientesService.buscarPorId(id), agendamentosService.listar()])
+    Promise.all([clientesService.buscarPorId(id), agendamentosService.listarPorCliente(id)])
       .then(([encontrado, todos]) => {
         if (ignore) return;
         setResultado({
@@ -68,19 +71,21 @@ export function ClientDetailPage() {
   const erroCarga = carregando ? null : resultado?.erro ?? null;
 
   async function excluirCliente() {
-    if (!id) return;
+    if (!id || removendo) return;
     if (!window.confirm(`Remover ${cliente?.nome}? Isso não pode ser desfeito.`)) return;
+    setRemovendo(true);
     setErroAcao(null);
     try {
       await clientesService.remover(id);
       navigate('/clientes');
     } catch (err) {
       setErroAcao(mensagemDoErro(err, 'Não foi possível remover o cliente.'));
+      setRemovendo(false);
     }
   }
 
   if (carregando) {
-    return <p className="text-content-muted text-sm">Carregando…</p>;
+    return <Carregando texto="Carregando cliente…" />;
   }
 
   if (!id || !cliente) {
@@ -94,14 +99,14 @@ export function ClientDetailPage() {
 
   return (
     <div className="flex flex-col gap-5 max-w-xl">
-      <Link to="/clientes" className="btn btn-ghost btn-icon -ml-2 self-start">
+      <Link to="/clientes" className="btn btn-ghost btn-icon -ml-2 self-start" aria-label="Voltar para clientes">
         <ArrowLeft size={18} />
       </Link>
 
       <div className="flex items-start gap-3">
-        <span className="w-11 h-11 rounded-full bg-accent-2-200 dark:bg-accent-2-800 flex-none" />
+        <Avatar nome={cliente.nome} tamanho="lg" />
         <div className="flex-1 min-w-0">
-          <h1 className="text-xl md:text-2xl truncate">{cliente.nome}</h1>
+          <h1 className="text-xl md:text-2xl [overflow-wrap:anywhere]">{cliente.nome}</h1>
           <p className="text-xs text-content-muted">
             Cliente desde {new Date(cliente.criadoEm).toLocaleDateString('pt-BR')}
           </p>
@@ -111,7 +116,7 @@ export function ClientDetailPage() {
         </button>
       </div>
 
-      <div className="flex flex-col gap-1 text-sm text-content-muted">
+      <div className="flex flex-col gap-1 text-sm text-content-muted [overflow-wrap:anywhere]">
         <span>{cliente.email || 'Sem email cadastrado'}</span>
         <span>{cliente.telefone}</span>
       </div>
@@ -119,7 +124,7 @@ export function ClientDetailPage() {
       {cliente.observacoes && (
         <div className="card">
           <p className="card-title text-sm">Notas</p>
-          <p className="text-sm text-content-muted whitespace-pre-wrap">{cliente.observacoes}</p>
+          <p className="text-sm text-content-muted whitespace-pre-wrap [overflow-wrap:anywhere]">{cliente.observacoes}</p>
         </div>
       )}
 
@@ -128,17 +133,17 @@ export function ClientDetailPage() {
         {historico.length === 0 && <p className="text-sm text-content-muted">Nenhum agendamento ainda.</p>}
         {historico.map((a) => (
           <div key={a.id} className="flex items-center gap-3 text-sm border-b border-line pb-2">
-            <span className="text-content-muted w-24 flex-none">
+            <span className="text-content-muted w-24 flex-none tabular-nums">
               {new Date(a.dataHora).toLocaleDateString('pt-BR')}
             </span>
-            <span className="flex-1 truncate">{a.observacoes || `${a.duracaoMinutos} min`}</span>
+            <span className="flex-1 min-w-0 truncate">{a.observacoes || `${a.duracaoMinutos} min`}</span>
             <StatusPill status={a.status} />
           </div>
         ))}
       </div>
 
       {erroAcao && (
-        <p role="alert" className="text-sm text-accent-700 dark:text-accent-300">
+        <p role="alert" className="form-error">
           {erroAcao}
         </p>
       )}
@@ -147,8 +152,8 @@ export function ClientDetailPage() {
         <button className="btn btn-primary flex-1" onClick={() => setDialogAberto(true)}>
           Agendar próxima sessão
         </button>
-        <button className="btn btn-secondary" onClick={excluirCliente}>
-          Remover
+        <button className="btn btn-secondary" disabled={removendo} onClick={excluirCliente}>
+          {removendo ? 'Removendo…' : 'Remover'}
         </button>
       </div>
 

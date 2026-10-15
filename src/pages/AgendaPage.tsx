@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import { CalendarDays, ChevronLeft, ChevronRight, Pencil, Plus, Trash2, X } from 'lucide-react';
+import { CalendarDays, ChevronLeft, ChevronRight, Pencil, Plus, Trash2 } from 'lucide-react';
 
 import { AppointmentFormDialog } from '../components/AppointmentFormDialog';
+import { Dialog } from '../components/Dialog';
 import { ErrorState } from '../components/ErrorState';
+import { Carregando } from '../components/Feedback';
 import { MiniCalendar } from '../components/MiniCalendar';
 import { StatusPill } from '../components/StatusPill';
 import { agendamentosService } from '../services/agendamentos';
@@ -15,10 +17,11 @@ import { formatDiaLabel, formatHora, getLocalHour, isSameLocalDay, toLocalDateIn
 const HORA_INICIO_PADRAO = 6;
 const HORA_FIM_PADRAO = 22;
 
-const BORDA_POR_STATUS: Record<AgendamentoStatus, string> = {
-  AGENDADO: 'border-l-accent-500',
-  CONCLUIDO: 'border-l-accent-2-500',
-  CANCELADO: 'border-l-line',
+/** Ponto de status ao lado do horário; o texto do status fica na tag (StatusPill). */
+const PONTO_POR_STATUS: Record<AgendamentoStatus, string> = {
+  AGENDADO: 'bg-accent',
+  CONCLUIDO: 'bg-accent-2-500',
+  CANCELADO: 'bg-line-strong',
 };
 
 /**
@@ -64,6 +67,7 @@ export function AgendaPage() {
   const [resultado, setResultado] = useState<AgendaDoDia | null>(null);
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [erroAcao, setErroAcao] = useState<string | null>(null);
+  const [acaoPendente, setAcaoPendente] = useState<string | null>(null);
   const [dialogAberto, setDialogAberto] = useState(false);
   const [horaParaAgendar, setHoraParaAgendar] = useState<string | undefined>(undefined);
   const [agendamentoEditando, setAgendamentoEditando] = useState<Agendamento | null>(null);
@@ -179,26 +183,36 @@ export function AgendaPage() {
     setResultado((atual) => (atual ? { ...atual, lista: atualizar(atual.lista) } : atual));
   }
 
-  async function marcar(id: string, acao: 'cancelar' | 'concluir') {
+  async function marcar(agendamento: Agendamento, acao: 'cancelar' | 'concluir') {
+    if (acaoPendente) return;
+    const descricao = `${formatHora(agendamento.dataHora)} com ${nomeCliente(agendamento.clienteId)}`;
+    if (acao === 'cancelar' && !window.confirm(`Cancelar o horário das ${descricao}?`)) return;
+    setAcaoPendente(agendamento.id);
     setErroAcao(null);
     try {
       const atualizado = await (acao === 'cancelar'
-        ? agendamentosService.cancelar(id)
-        : agendamentosService.concluir(id));
-      substituirLista((lista) => lista.map((a) => (a.id === id ? atualizado : a)));
+        ? agendamentosService.cancelar(agendamento.id)
+        : agendamentosService.concluir(agendamento.id));
+      substituirLista((lista) => lista.map((a) => (a.id === agendamento.id ? atualizado : a)));
     } catch (err) {
-      setErroAcao(mensagemDoErro(err, 'Não foi possível atualizar o agendamento.'));
+      setErroAcao(mensagemDoErro(err, `Não foi possível atualizar o horário das ${descricao}.`));
+    } finally {
+      setAcaoPendente(null);
     }
   }
 
   async function removerAgendamento(id: string) {
+    if (acaoPendente) return;
     if (!window.confirm('Excluir este agendamento? Isso não pode ser desfeito.')) return;
+    setAcaoPendente(id);
     setErroAcao(null);
     try {
       await agendamentosService.remover(id);
       removerDaLista(id);
     } catch (err) {
       setErroAcao(mensagemDoErro(err, 'Não foi possível excluir o agendamento.'));
+    } finally {
+      setAcaoPendente(null);
     }
   }
 
@@ -223,7 +237,7 @@ export function AgendaPage() {
   return (
     <div className="flex flex-col gap-5 min-h-[calc(100vh-8rem)] md:min-h-[calc(100vh-9rem)]">
       <div className="flex items-center gap-3 flex-wrap">
-        <h1 className="text-2xl md:text-3xl capitalize">{formatDiaLabel(dia)}</h1>
+        <h1 className="text-2xl md:text-3xl capitalize w-full md:w-auto">{formatDiaLabel(dia)}</h1>
         <button className="btn btn-icon btn-secondary" onClick={() => mudarDia(-1)} aria-label="Dia anterior">
           <ChevronLeft size={16} />
         </button>
@@ -261,7 +275,7 @@ export function AgendaPage() {
             </div>
           )}
 
-          {carregando && <p className="text-content-muted text-sm">Carregando…</p>}
+          {carregando && <Carregando texto="Carregando agenda…" />}
 
           {erroCarga && (
             <div className="flex-1 flex items-center justify-center">
@@ -270,7 +284,7 @@ export function AgendaPage() {
           )}
 
           {erroAcao && (
-            <p role="alert" className="text-sm text-accent-700 dark:text-accent-300">
+            <p role="alert" className="form-error">
               {erroAcao}
             </p>
           )}
@@ -279,17 +293,21 @@ export function AgendaPage() {
             <div className="flex flex-col max-w-3xl w-full">
               {horas.map((h) => (
                 <div key={h} className="grid grid-cols-[52px_1fr] gap-3 border-t border-line first:border-t-0 py-2">
-                  <div className="text-xs text-content-muted pt-3">{formatHoraCheia(h)}</div>
+                  <div className="text-xs text-content-muted pt-3 tabular-nums">{formatHoraCheia(h)}</div>
                   <div className="flex flex-col gap-2 min-h-11 justify-center">
                     {(porHora.get(h) ?? []).length > 0 ? (
                       (porHora.get(h) ?? []).map((a) => (
                         <div
                           key={a.id}
-                          className={`card flex-row items-center gap-4 border-l-4 ${BORDA_POR_STATUS[a.status]}`}
+                          className={`card grid grid-cols-[3.5rem_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 md:flex md:flex-row md:gap-4`}
+                          aria-busy={acaoPendente === a.id || undefined}
                         >
                           <div className="w-14 flex-none">
-                            <div className="font-semibold text-sm">{formatHora(a.dataHora)}</div>
-                            <div className="text-[11px] text-content-muted">{a.duracaoMinutos} min</div>
+                            <div className="flex items-center gap-1.5 font-semibold text-sm tabular-nums">
+                              <span aria-hidden="true" className={`w-2 h-2 flex-none rounded-full ${PONTO_POR_STATUS[a.status]}`} />
+                              {formatHora(a.dataHora)}
+                            </div>
+                            <div className="text-[11px] text-content-muted tabular-nums">{a.duracaoMinutos} min</div>
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="font-semibold text-sm truncate">{nomeCliente(a.clienteId)}</div>
@@ -298,13 +316,13 @@ export function AgendaPage() {
                             )}
                           </div>
                           <StatusPill status={a.status} />
-                          <div className="flex gap-1 flex-none">
+                          <div className="col-start-2 col-span-2 flex gap-1 justify-end -mr-1.5 md:mr-0 md:flex-none">
                             {a.status === 'AGENDADO' && (
                               <>
-                                <button className="btn btn-ghost text-xs" onClick={() => marcar(a.id, 'concluir')}>
+                                <button className="btn btn-ghost text-xs" disabled={acaoPendente === a.id} onClick={() => marcar(a, 'concluir')}>
                                   Concluir
                                 </button>
-                                <button className="btn btn-ghost text-xs" onClick={() => marcar(a.id, 'cancelar')}>
+                                <button className="btn btn-ghost text-xs" disabled={acaoPendente === a.id} onClick={() => marcar(a, 'cancelar')}>
                                   Cancelar
                                 </button>
                               </>
@@ -313,15 +331,16 @@ export function AgendaPage() {
                               type="button"
                               className="btn btn-icon btn-ghost"
                               onClick={() => abrirEdicao(a)}
-                              aria-label="Editar agendamento"
+                              aria-label={`Editar agendamento das ${formatHora(a.dataHora)}`}
                             >
                               <Pencil size={14} />
                             </button>
                             <button
                               type="button"
                               className="btn btn-icon btn-ghost"
+                              disabled={acaoPendente === a.id}
                               onClick={() => removerAgendamento(a.id)}
-                              aria-label="Excluir agendamento"
+                              aria-label={`Excluir agendamento das ${formatHora(a.dataHora)}`}
                             >
                               <Trash2 size={14} />
                             </button>
@@ -332,7 +351,7 @@ export function AgendaPage() {
                       <button
                         type="button"
                         onClick={() => abrirNovoAgendamento(formatHoraCheia(h))}
-                        className="flex items-center justify-center rounded-2xl border border-dashed border-line text-content-muted text-xs py-3 cursor-pointer transition-colors hover:border-accent hover:text-accent"
+                        className="flex items-center justify-center rounded-2xl border border-dashed border-line text-content-muted text-xs py-3 cursor-pointer transition-colors hover:border-accent-ink hover:text-accent-ink"
                       >
                         livre · toque pra agendar
                       </button>
@@ -356,19 +375,7 @@ export function AgendaPage() {
       </div>
 
       {calendarioAberto && (
-        <div className="dialog-backdrop" onClick={() => setCalendarioAberto(false)}>
-          <div className="dialog" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center">
-              <h2 className="dialog-title">Calendário</h2>
-              <button
-                type="button"
-                onClick={() => setCalendarioAberto(false)}
-                aria-label="Fechar"
-                className="ml-auto btn btn-icon btn-ghost"
-              >
-                <X size={18} />
-              </button>
-            </div>
+        <Dialog titulo="Calendário" onClose={() => setCalendarioAberto(false)}>
             <MiniCalendar
               mesVisivel={mesVisivel}
               diaSelecionado={dia}
@@ -379,8 +386,7 @@ export function AgendaPage() {
               }}
               onMudarMes={mudarMes}
             />
-          </div>
-        </div>
+        </Dialog>
       )}
 
       {dialogAberto && (
