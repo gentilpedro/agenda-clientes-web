@@ -29,7 +29,7 @@ export function LandingPage() {
     <div className="min-h-screen flex flex-col">
       <header className="flex items-center gap-6 px-6 py-4 md:px-10 border-b border-line">
         <div className="flex items-center gap-2">
-          <img src="/favicon.png" alt="Agenda" className="w-9 h-9 shrink-0" />
+          <img src="/favicon.svg" alt="" className="w-9 h-9 shrink-0" />
           <span className="font-heading text-base">Agenda</span>
         </div>
         <div className="hidden md:flex gap-5 text-sm text-content-muted">
@@ -147,7 +147,7 @@ export function LandingPage() {
 
         <footer className="flex flex-wrap items-center gap-x-5 gap-y-2 px-6 py-5 md:px-10 text-xs text-content-muted border-t border-line">
           <div className="flex items-center gap-2">
-            <img src="/favicon.png" alt="" className="w-5 h-5 shrink-0" />
+            <img src="/favicon.svg" alt="" className="w-5 h-5 shrink-0" />
             Agenda
           </div>
           <span>© {new Date().getFullYear()} Agenda Clientes. Todos os direitos reservados.</span>

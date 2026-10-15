@@ -13,7 +13,7 @@ export function LegalPageLayout({ titulo, atualizadoEm, children }: LegalPageLay
     <div className="min-h-screen flex flex-col">
       <header className="flex items-center gap-3 px-6 py-4 md:px-10 border-b border-line">
         <Link to="/" className="flex items-center gap-2">
-          <img src="/favicon.png" alt="Agenda" className="w-8 h-8 shrink-0" />
+          <img src="/favicon.svg" alt="" className="w-8 h-8 shrink-0" />
           <span className="font-heading text-base">Agenda</span>
         </Link>
         <Link to="/" className="ml-auto btn btn-ghost text-sm">
