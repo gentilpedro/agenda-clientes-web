@@ -1,0 +1,23 @@
+# agenda (front) em produção na VPS (https://agenda.aamora.com.br). Cópia em /opt/agenda/docker-compose.yml.
+# Quem sobe o serviço web é o /usr/local/bin/app-deploy, com a imagem agenda:<versão> enviada
+# pelo próprio deploy (docker save por SSH, sem registry). SPA estática: sem banco e sem segredos;
+# a API fica em https://agenda-api.aamora.com.br (app agenda-api).
+name: agenda
+
+services:
+  web:
+    image: agenda:${APP_VERSION:?APP_VERSION não definido}
+    restart: unless-stopped
+    # Nginx servindo arquivos estáticos. A VPS tem 3,6 GB para todas as apps: confira a soma dos
+    # mem_limit no vps_info.sh.
+    mem_limit: 64m
+    # Só o Nginx do host fala com o app.
+    ports: ["127.0.0.1:5102:8080"]
+    networks: [agenda]
+
+networks:
+  agenda:
+    ipam:
+      config:
+        - subnet: 172.30.2.0/24
+          gateway: 172.30.2.1
