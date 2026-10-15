@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
+import { Field } from '../components/Field';
+import { mensagemDoErro } from '../services/api';
 import { authService } from '../services/auth';
-import { ApiRequestError } from '../services/api';
 
 export function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -13,17 +14,18 @@ export function ForgotPasswordPage() {
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
+    if (enviando) return;
     setEnviando(true);
     setErro(null);
     try {
-      const resposta = await authService.esqueciSenha(email);
+      const resposta = await authService.esqueciSenha(email.trim());
       setEnviado(true);
       if (resposta.tokenDev) {
         const params = new URLSearchParams({ email, token: resposta.tokenDev });
         setLinkDev(`/redefinir-senha?${params.toString()}`);
       }
     } catch (err) {
-      setErro(err instanceof ApiRequestError ? err.message : 'Não foi possível processar o pedido');
+      setErro(mensagemDoErro(err, 'Não foi possível processar o pedido. Tente de novo.'));
     } finally {
       setEnviando(false);
     }
@@ -31,8 +33,8 @@ export function ForgotPasswordPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6">
-      <div className="w-full max-w-[340px] flex flex-col gap-5">
-        <span className="w-11 h-11 rounded-full bg-accent" />
+      <main className="w-full max-w-[340px] flex flex-col gap-5">
+        <img src="/favicon.svg" alt="" className="w-11 h-11" />
         <div>
           <h1 className="text-2xl leading-tight">Esqueci minha senha</h1>
           <p className="text-sm text-content-muted mt-2">
@@ -42,18 +44,25 @@ export function ForgotPasswordPage() {
 
         {!enviado && (
           <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-            <div className="field">
-              <label>Email</label>
-              <input
-                type="email"
-                className="input"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoFocus
-              />
-            </div>
-            {erro && <p className="text-sm text-accent-700 dark:text-accent-300">{erro}</p>}
+            <Field label="Email">
+              {(control) => (
+                <input
+                  {...control}
+                  type="email"
+                  className="input"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="email"
+                  required
+                  autoFocus
+                />
+              )}
+            </Field>
+            {erro && (
+              <p role="alert" className="form-error">
+                {erro}
+              </p>
+            )}
             <button type="submit" className="btn btn-primary btn-block" disabled={enviando}>
               {enviando ? 'Enviando…' : 'Enviar link'}
             </button>
@@ -61,7 +70,7 @@ export function ForgotPasswordPage() {
         )}
 
         {enviado && (
-          <div className="card gap-3">
+          <div role="status" className="card gap-3">
             <p className="text-sm">Se o email existir, um link de redefinição foi gerado.</p>
             {linkDev && (
               <div className="flex flex-col gap-2 text-xs">
@@ -78,11 +87,11 @@ export function ForgotPasswordPage() {
         )}
 
         <p className="text-sm text-center text-content-muted">
-          <Link to="/login" className="text-accent-700 dark:text-accent-300 font-semibold">
+          <Link to="/login" className="text-accent-ink font-semibold underline-offset-4 hover:underline">
             Voltar para o login
           </Link>
         </p>
-      </div>
+      </main>
     </div>
   );
 }

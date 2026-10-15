@@ -88,18 +88,18 @@ export function MiniCalendar({
               aria-current={hoje ? 'date' : undefined}
               aria-label={dia.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })}
               className={[
-                'relative w-full aspect-square rounded-full text-sm flex items-center justify-center transition-colors cursor-pointer',
+                'relative w-full aspect-square rounded-full text-sm tabular-nums flex items-center justify-center transition-colors cursor-pointer',
                 selecionado
-                  ? 'bg-accent text-surface font-semibold'
+                  ? 'bg-accent text-on-accent font-semibold'
                   : hoje
-                    ? 'border border-accent text-accent font-semibold'
+                    ? 'border border-accent-ink text-accent-ink font-semibold'
                     : 'hover:bg-accent-100 dark:hover:bg-accent-900',
                 foraDoMes && !selecionado ? 'text-content-muted/50' : '',
               ].join(' ')}
             >
               {dia.getDate()}
               {temAgendamento && !selecionado && (
-                <span className="absolute bottom-1 w-1 h-1 rounded-full bg-accent" />
+                <span aria-hidden="true" className="absolute bottom-1 w-1 h-1 rounded-full bg-accent-ink" />
               )}
             </button>
           );

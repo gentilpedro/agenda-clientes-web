@@ -13,8 +13,7 @@ export function ThemeToggle() {
       onClick={toggleTheme}
       title={label}
       aria-label={label}
-      aria-pressed={isDark}
-      className="cursor-pointer rounded-full p-2 text-content-muted transition-colors hover:bg-accent-100 dark:hover:bg-accent-900"
+      className="tap-target cursor-pointer rounded-full p-2 text-content-muted transition-colors hover:bg-accent-100 dark:hover:bg-accent-900"
     >
       {isDark ? <Sun size={20} /> : <Moon size={20} />}
     </button>

@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Caprasimo&family=Figtree:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 /* Dark mode por classe no <html> (e não só por prefers-color-scheme),
@@ -15,9 +14,13 @@
   --surface:         #f5ead8;
   --surface-raised:  #ebddc5;
   --content:         #201e1d;
-  --content-muted:   rgba(32, 30, 29, 0.55);
+  --content-muted:   rgba(32, 30, 29, 0.68);
   --heading:         #201e1d;
   --line:            rgba(32, 30, 29, 0.16);
+  /* Contorno de controles (campos): precisa de 3:1 contra o fundo (WCAG 1.4.11). */
+  --line-strong:     rgba(32, 30, 29, 0.55);
+  /* Terracota como texto/ícone/foco: o acento puro só dá 3:1 sobre creme. */
+  --accent-ink:      #8c491a;
 }
 
 .dark {
@@ -29,6 +32,8 @@
   --content-muted:   rgba(242, 231, 213, 0.55);
   --heading:         #f2e7d5;
   --line:            rgba(242, 231, 213, 0.14);
+  --line-strong:     rgba(242, 231, 213, 0.45);
+  --accent-ink:      #d67f48;
 }
 
 @theme {
@@ -53,6 +58,8 @@
   --color-accent-800: #643312;
   --color-accent-900: #402310;
   --color-accent:     #c67139;
+  /* Texto sobre o acento: carvão nos dois temas (4.6:1; creme dava 3:1). */
+  --color-on-accent:  #201e1d;
 
   --color-accent-2-100: #f0fae1;
   --color-accent-2-200: #e1eecc;
@@ -72,6 +79,8 @@
   --color-content-muted:    var(--content-muted);
   --color-heading:          var(--heading);
   --color-line:             var(--line);
+  --color-line-strong:      var(--line-strong);
+  --color-accent-ink:       var(--accent-ink);
 }
 
 html,
@@ -84,6 +93,9 @@ body,
 }
 
 body {
+  /* viewport-fit=cover: no celular deitado, o conteúdo não entra no recorte da câmera. */
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
   background: var(--surface);
   color: var(--content);
   font-family: var(--font-body);
@@ -104,8 +116,10 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 :focus { outline: none; }
-:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+:focus-visible { outline: 2px solid var(--color-accent-ink); outline-offset: 2px; }
 ::selection { background: color-mix(in srgb, var(--color-accent) 30%, transparent); }
+::placeholder { color: var(--color-content-muted); opacity: 1; }
+html { scrollbar-color: var(--color-line-strong) transparent; }
 
 /* ══════════════════════════════════════════════════════════════════════
    Componentes do design system "Organic" — classes prontas, para usar
@@ -131,42 +145,60 @@ h1, h2, h3, h4, h5, h6 {
   transition: background-color 0.15s ease;
 }
 .btn:disabled { opacity: 0.45; cursor: not-allowed; }
-.btn-primary { background: var(--color-accent); color: var(--color-surface); }
-.btn-primary:hover { background: var(--color-accent-600); }
-.btn-primary:active { background: var(--color-accent-700); }
+/* Com texto carvão, o hover clareia o barro em vez de escurecer:
+   escurecer derrubaria o contraste abaixo de 4.5:1. */
+.btn-primary { background: var(--color-accent); color: var(--color-on-accent); }
+.btn-primary:hover { background: var(--color-accent-500); }
+.btn-primary:active { background: var(--color-accent-400); }
 .btn-secondary { border-color: var(--color-line); }
 .btn-secondary:hover { background: color-mix(in srgb, var(--color-content) 7%, transparent); }
 .btn-secondary:active { background: color-mix(in srgb, var(--color-content) 14%, transparent); }
-.btn-ghost { color: var(--color-accent); padding-inline: 6px; }
-.btn-ghost:hover { background: color-mix(in srgb, var(--color-accent) 10%, transparent); }
-.btn-ghost:active { background: color-mix(in srgb, var(--color-accent) 18%, transparent); }
+.btn-ghost { color: var(--color-accent-ink); padding-inline: 6px; }
+.btn-ghost:hover { background: color-mix(in srgb, var(--color-accent-ink) 10%, transparent); }
+.btn-ghost:active { background: color-mix(in srgb, var(--color-accent-ink) 18%, transparent); }
 .btn-icon { width: 36px; height: 36px; padding: 0; }
 .btn-block { width: 100%; }
 
-.field > label {
-  display: block; font-size: 12px; font-weight: 600; margin-bottom: 5px;
+fieldset.field { border: 0; padding: 0; margin: 0; min-width: 0; }
+.field > label,
+.field > legend {
+  display: block; font-size: 12px; font-weight: 600; margin-bottom: 5px; padding: 0;
   color: color-mix(in srgb, var(--color-content) 70%, transparent);
 }
+.field-hint { margin-top: 5px; font-size: 12px; color: var(--color-content-muted); }
+/* Erro é terracota escuro (não um vermelho de alarme); o mesmo tom dos links. */
+.field-error,
+.form-error { color: var(--color-accent-700); }
+.dark .field-error,
+.dark .form-error { color: var(--color-accent-300); }
+.field-error { margin-top: 5px; font-size: 12px; font-weight: 600; }
+.form-error { font-size: 14px; }
 .input {
   width: 100%; min-height: 40px; padding: 8px 16px; font: inherit;
   font-size: 14px; color: var(--color-content); caret-color: var(--color-accent);
   background: var(--color-surface-raised);
-  border: 1px solid var(--color-line); border-radius: 999px;
+  border: 1px solid var(--color-line-strong); border-radius: 999px;
 }
-.input:hover { border-color: color-mix(in srgb, var(--color-content) 45%, transparent); }
-.input:focus-visible { border-color: var(--color-accent); outline-offset: 0; }
+.input:hover { border-color: color-mix(in srgb, var(--color-content) 75%, transparent); }
+.input:focus-visible { border-color: var(--color-accent-ink); outline-offset: 0; }
+.input[aria-invalid="true"] { border-color: var(--color-accent-700); }
+.dark .input[aria-invalid="true"] { border-color: var(--color-accent-300); }
 textarea.input { min-height: 90px; border-radius: var(--radius-md); resize: vertical; }
+/* Abaixo de 16px o Safari do iOS dá zoom ao focar o campo e desmonta o layout. */
+@media (max-width: 767px) {
+  .input { font-size: 16px; }
+}
 
 /* react-international-phone: mapeia as CSS vars da lib pros tokens do design system. */
 .phone-input.react-international-phone-input-container {
   --react-international-phone-background-color: var(--color-surface-raised);
   --react-international-phone-text-color: var(--color-content);
-  --react-international-phone-border-color: var(--color-line);
+  --react-international-phone-border-color: var(--color-line-strong);
   --react-international-phone-height: 40px;
   --react-international-phone-font-size: 14px;
   --react-international-phone-country-selector-background-color: var(--color-surface-raised);
   --react-international-phone-country-selector-background-color-hover: color-mix(in srgb, var(--color-content) 7%, transparent);
-  --react-international-phone-country-selector-border-color: var(--color-line);
+  --react-international-phone-country-selector-border-color: var(--color-line-strong);
   --react-international-phone-country-selector-arrow-color: var(--color-content-muted);
   --react-international-phone-dropdown-item-background-color: var(--color-surface-raised);
   --react-international-phone-dropdown-item-text-color: var(--color-content);
@@ -184,6 +216,9 @@ textarea.input { min-height: 90px; border-radius: var(--radius-md); resize: vert
   border-radius: 0 999px 999px 0;
   flex: 1;
 }
+@media (max-width: 767px) {
+  .phone-input.react-international-phone-input-container { --react-international-phone-font-size: 16px; }
+}
 
 .seg {
   display: inline-flex; overflow: hidden;
@@ -197,6 +232,8 @@ textarea.input { min-height: 90px; border-radius: var(--radius-md); resize: vert
 .seg-opt:has(input:checked) { background: var(--color-content); color: var(--color-surface); }
 .seg-opt:not(:has(input:checked)):hover { background: color-mix(in srgb, var(--color-content) 7%, transparent); }
 .seg-opt input { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+/* O rádio é invisível, então o foco de teclado aparece na opção inteira. */
+.seg-opt:has(input:focus-visible) { outline: 2px solid var(--color-accent-ink); outline-offset: -3px; border-radius: 999px; }
 
 .card {
   display: flex; flex-direction: column; gap: 8px;
@@ -217,7 +254,7 @@ textarea.input { min-height: 90px; border-radius: var(--radius-md); resize: vert
 .tag-accent { background: var(--color-accent-100); color: var(--color-accent-800); }
 .tag-accent-2 { background: var(--color-accent-2-100); color: var(--color-accent-2-800); }
 .tag-neutral { background: color-mix(in srgb, var(--color-content) 10%, transparent); color: var(--color-content); }
-.tag-outline { border: 1px solid var(--color-accent); color: var(--color-accent); }
+.tag-outline { border: 1px solid var(--color-accent-ink); color: var(--color-accent-ink); }
 
 /* Nomeada ds-table (não "table") para não colidir com o utilitário
    nativo do Tailwind `.table { display: table }`, que venceria a
@@ -231,18 +268,42 @@ textarea.input { min-height: 90px; border-radius: var(--radius-md); resize: vert
 .ds-table td { padding: 11px 8px; border-bottom: 1px solid var(--color-line); }
 .ds-table tbody tr:hover { background: color-mix(in srgb, var(--color-content) 4%, transparent); cursor: pointer; }
 
-.dialog-backdrop {
-  position: fixed; inset: 0; z-index: 50; display: grid; place-items: center;
-  padding: 17px;
-  background: color-mix(in srgb, #2e2b25 50%, transparent);
-}
+/* <dialog> nativo aberto com showModal(): o navegador cuida do foco preso,
+   do Esc e de deixar o resto da página inerte. O padding fica no .dialog-body
+   para que um clique no próprio <dialog> signifique "clicou no véu". */
 .dialog {
-  width: min(440px, 100%); max-height: calc(100vh - 34px); overflow-y: auto;
-  display: flex; flex-direction: column; gap: 13px;
-  padding: 22px; border-radius: calc(var(--radius-lg) * 1.15);
+  width: min(440px, calc(100% - 34px)); max-width: none; max-height: calc(100dvh - 34px);
+  margin: auto; padding: 0; border: 0; overflow-y: auto;
+  color: var(--color-content);
+  border-radius: calc(var(--radius-lg) * 1.15);
   background: var(--color-surface-raised); box-shadow: var(--shadow-lg);
 }
+.dialog::backdrop { background: color-mix(in srgb, #2e2b25 50%, transparent); }
+.dialog-body { display: flex; flex-direction: column; gap: 13px; padding: 22px; }
 .dialog-title { font-family: var(--font-heading); font-size: 20px; }
 .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+
+/* No celular o diálogo vira uma folha presa ao rodapé: o "Agendar" fica ao
+   alcance do polegar e o teclado virtual empurra a folha, não a esconde. */
+@media (max-width: 767px) {
+  .dialog {
+    width: 100%; max-height: calc(100dvh - 24px);
+    margin: auto 0 0;
+    border-radius: calc(var(--radius-lg) * 1.15) calc(var(--radius-lg) * 1.15) 0 0;
+  }
+  .dialog-body { padding-bottom: max(22px, calc(env(safe-area-inset-bottom) + 14px)); }
+}
+
+/* Alvos de toque: 44px em telas de toque (celular, tablet, notebook com
+   touch). Com mouse, a densidade original fica como está. */
+@media (pointer: coarse) {
+  .btn { min-height: 44px; }
+  .btn-icon { width: 44px; height: 44px; }
+  .btn-ghost { padding-inline: 10px; }
+  .input { min-height: 44px; }
+  .seg-opt { min-height: 44px; }
+  .phone-input.react-international-phone-input-container { --react-international-phone-height: 44px; }
+  .tap-target { min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
+}
 
 }
