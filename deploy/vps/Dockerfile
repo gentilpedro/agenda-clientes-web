@@ -1,0 +1,18 @@
+# Imagem de produção da VPS (https://agenda.aamora.com.br). Contexto = raiz do repositório:
+#   docker build -f deploy/vps/Dockerfile --build-arg VITE_API_URL=https://agenda-api.aamora.com.br/api -t agenda:1.2.3 .
+FROM node:22-alpine AS build
+WORKDIR /src
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY . .
+# Variáveis VITE_* entram no bundle e são PÚBLICAS: só URLs e flags, nunca segredo.
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
+RUN npm run build
+
+FROM nginxinc/nginx-unprivileged:alpine
+ARG VERSAO=dev
+LABEL org.opencontainers.image.version=$VERSAO
+COPY deploy/vps/spa.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /src/dist /usr/share/nginx/html
+EXPOSE 8080

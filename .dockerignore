@@ -1,0 +1,12 @@
+.git
+.github
+.vscode
+.idea
+.claude
+.impeccable
+**/node_modules
+dist
+*.env
+.env*
+!.env.example
+deploy/vps/*.md
