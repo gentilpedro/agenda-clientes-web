@@ -17,10 +17,11 @@ import { formatDiaLabel, formatHora, getLocalHour, isSameLocalDay, toLocalDateIn
 const HORA_INICIO_PADRAO = 6;
 const HORA_FIM_PADRAO = 22;
 
-const BORDA_POR_STATUS: Record<AgendamentoStatus, string> = {
-  AGENDADO: 'border-l-accent-500',
-  CONCLUIDO: 'border-l-accent-2-500',
-  CANCELADO: 'border-l-line',
+/** Ponto de status ao lado do horário; o texto do status fica na tag (StatusPill). */
+const PONTO_POR_STATUS: Record<AgendamentoStatus, string> = {
+  AGENDADO: 'bg-accent',
+  CONCLUIDO: 'bg-accent-2-500',
+  CANCELADO: 'bg-line-strong',
 };
 
 /**
@@ -298,11 +299,14 @@ export function AgendaPage() {
                       (porHora.get(h) ?? []).map((a) => (
                         <div
                           key={a.id}
-                          className={`card grid grid-cols-[3.5rem_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 md:flex md:flex-row md:gap-4 border-l-4 ${BORDA_POR_STATUS[a.status]}`}
+                          className={`card grid grid-cols-[3.5rem_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 md:flex md:flex-row md:gap-4`}
                           aria-busy={acaoPendente === a.id || undefined}
                         >
                           <div className="w-14 flex-none">
-                            <div className="font-semibold text-sm tabular-nums">{formatHora(a.dataHora)}</div>
+                            <div className="flex items-center gap-1.5 font-semibold text-sm tabular-nums">
+                              <span aria-hidden="true" className={`w-2 h-2 flex-none rounded-full ${PONTO_POR_STATUS[a.status]}`} />
+                              {formatHora(a.dataHora)}
+                            </div>
                             <div className="text-[11px] text-content-muted tabular-nums">{a.duracaoMinutos} min</div>
                           </div>
                           <div className="flex-1 min-w-0">
